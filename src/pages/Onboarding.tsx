@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -100,12 +99,17 @@ const Onboarding = () => {
       return;
     }
 
+    if (!user?.id) {
+      toast.error('Errore di autenticazione. Riprova.');
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase
         .from('user_profiles')
         .insert({
-          user_id: user?.id,
+          user_id: user.id,
           company_name: formData.companyName,
           sector: formData.sector,
           company_size: formData.companySize,
@@ -113,7 +117,10 @@ const Onboarding = () => {
           interests: formData.interests,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
       toast.success('Profilo completato con successo!');
       navigate('/dashboard');
