@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [checkingProfile, setCheckingProfile] = useState(true);
   
   const [formData, setFormData] = useState({
     companyName: '',
@@ -64,6 +65,41 @@ const Onboarding = () => {
     'Cultura e Turismo'
   ];
 
+  // Check if user already has a profile
+  useEffect(() => {
+    const checkExistingProfile = async () => {
+      if (!user?.id) {
+        setCheckingProfile(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data) {
+          // User already has a profile, redirect to dashboard
+          navigate('/dashboard');
+          return;
+        }
+
+        if (error && error.code !== 'PGRST116') {
+          // PGRST116 is "not found" error, which is expected for new users
+          console.error('Error checking profile:', error);
+        }
+      } catch (error) {
+        console.error('Error checking existing profile:', error);
+      } finally {
+        setCheckingProfile(false);
+      }
+    };
+
+    checkExistingProfile();
+  }, [user?.id, navigate]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -106,15 +142,18 @@ const Onboarding = () => {
 
     setLoading(true);
     try {
+      // Use upsert to handle potential duplicates gracefully
       const { error } = await supabase
         .from('user_profiles')
-        .insert({
+        .upsert({
           user_id: user.id,
           company_name: formData.companyName,
           sector: formData.sector,
           company_size: formData.companySize,
           region: formData.region,
           interests: formData.interests,
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) {
@@ -131,6 +170,18 @@ const Onboarding = () => {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking for existing profile
+  if (checkingProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-brand-light via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-navy mx-auto mb-4"></div>
+          <p className="text-brand-navy">Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderStep1 = () => (
     <Card className="shadow-xl border-0">
