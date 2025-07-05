@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, MessageSquare, Bot } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
@@ -24,6 +25,7 @@ const ChatInterface = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -36,20 +38,73 @@ const ChatInterface = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue('');
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      console.log('Sending request to webhook:', currentInput);
+      
+      const response = await fetch('https://fiscalot.duckdns.org/webhook-test/2f381203-47e1-4fd6-8221-438bad7fee08', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: currentInput,
+          timestamp: new Date().toISOString(),
+          user_id: 'user_' + Date.now()
+        }),
+      });
+
+      let aiResponse = '';
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Webhook response:', data);
+        
+        // Adatta la risposta in base alla struttura che ricevi dal webhook
+        aiResponse = data.response || data.message || data.reply || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+      } else {
+        console.error('Webhook error:', response.status, response.statusText);
+        aiResponse = 'Mi dispiace, si è verificato un errore nella comunicazione. Riprova più tardi.';
+        
+        toast({
+          title: "Errore di connessione",
+          description: "Non riesco a connettermi al servizio. Riprova più tardi.",
+          variant: "destructive",
+        });
+      }
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: `Ho capito che stai cercando "${inputValue}". Sto analizzando i bandi disponibili nel database... Al momento sono in fase di sviluppo, ma presto potrai ottenere risultati personalizzati basati sul tuo profilo aziendale.`,
+        text: aiResponse,
         isUser: false,
         timestamp: new Date()
       };
+
       setMessages(prev => [...prev, aiMessage]);
+      
+    } catch (error) {
+      console.error('Error calling webhook:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'Si è verificato un errore di connessione. Verifica che il servizio sia attivo e riprova.',
+        isUser: false,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "Errore di rete",
+        description: "Impossibile connettersi al servizio. Controlla la connessione e riprova.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -88,7 +143,7 @@ const ChatInterface = () => {
                       {!message.isUser && (
                         <MessageSquare className="w-4 h-4 mt-1 flex-shrink-0" />
                       )}
-                      <p className="text-sm leading-relaxed">{message.text}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
                     </div>
                     <p className="text-xs opacity-70 mt-2">
                       {message.timestamp.toLocaleTimeString('it-IT', { 
