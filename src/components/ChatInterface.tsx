@@ -111,47 +111,43 @@ const ChatInterface = () => {
         console.log('Raw webhook response:', responseText);
         
         try {
-          // Try to parse the response as JSON
           const data = JSON.parse(responseText);
           console.log('Parsed webhook response:', data);
           
-          // Check if this is our expected grant results format
+          // Check for grant results in various possible locations
+          let resultsData = null;
+          
           if (data.success && data.results && Array.isArray(data.results)) {
-            console.log('Found grant results in main response');
-            grantResults = data.results;
-            searchInfo = {
-              total_found: data.total_found || data.results.length,
-              search_time: data.search_time || 0
-            };
-            aiResponse = `Ho trovato ${data.total_found || data.results.length} bandi per te! Ecco i risultati più rilevanti:`;
-          } else {
-            // Try to find JSON in the response text (in case it's wrapped)
-            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              try {
-                const extractedData = JSON.parse(jsonMatch[0]);
-                console.log('Extracted JSON data:', extractedData);
-                
-                if (extractedData.success && extractedData.results && Array.isArray(extractedData.results)) {
-                  console.log('Found grant results in extracted JSON');
-                  grantResults = extractedData.results;
-                  searchInfo = {
-                    total_found: extractedData.total_found || extractedData.results.length,
-                    search_time: extractedData.search_time || 0
-                  };
-                  aiResponse = `Ho trovato ${extractedData.total_found || extractedData.results.length} bandi per te! Ecco i risultati più rilevanti:`;
-                } else {
-                  aiResponse = 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
-                }
-              } catch (extractError) {
-                console.log('Error parsing extracted JSON:', extractError);
-                aiResponse = 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+            // Direct format
+            resultsData = data;
+            console.log('Found grant results in direct format');
+          } else if (data.output) {
+            // Results in output field
+            try {
+              const outputStr = typeof data.output === 'string' ? data.output : JSON.stringify(data.output);
+              const cleanOutput = outputStr.replace(/```json\n?|\n?```/g, '').trim();
+              const outputData = JSON.parse(cleanOutput);
+              if (outputData.success && outputData.results && Array.isArray(outputData.results)) {
+                resultsData = outputData;
+                console.log('Found grant results in output field');
               }
-            } else {
-              // No JSON found, treat as regular text response
-              aiResponse = responseText || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+            } catch (outputError) {
+              console.log('Could not parse output field:', outputError);
             }
           }
+          
+          if (resultsData && resultsData.results && Array.isArray(resultsData.results)) {
+            grantResults = resultsData.results;
+            searchInfo = {
+              total_found: resultsData.total_found || resultsData.results.length,
+              search_time: resultsData.search_time || 0
+            };
+            aiResponse = `Ho trovato ${resultsData.total_found || resultsData.results.length} bandi per te! Ecco i risultati più rilevanti:`;
+          } else {
+            // No structured results found, use text response
+            aiResponse = data.response || data.message || data.text || responseText || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+          }
+          
         } catch (parseError) {
           console.log('Response is not valid JSON, treating as plain text:', parseError);
           aiResponse = responseText || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
