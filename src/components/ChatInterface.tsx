@@ -34,7 +34,7 @@ interface GrantResult {
   relevance_score: number;
   complexity_score: number;
   success_probability: number;
-  urgency_level: number;
+  urgency_level?: number;
   keywords: string[];
 }
 
@@ -107,21 +107,51 @@ const ChatInterface = () => {
       let searchInfo = undefined;
       
       if (response.ok) {
-        const data = await response.json();
-        console.log('Webhook response:', data);
+        const responseText = await response.text();
+        console.log('Raw webhook response:', responseText);
         
-        // Controlla se la risposta contiene risultati di bandi
-        if (data.success && data.results && Array.isArray(data.results)) {
-          grantResults = data.results;
-          searchInfo = {
-            total_found: data.total_found || data.results.length,
-            search_time: data.search_time || 0
-          };
+        try {
+          // First try to parse the response as JSON
+          const data = JSON.parse(responseText);
+          console.log('Parsed webhook response:', data);
           
-          aiResponse = `Ho trovato ${data.total_found || data.results.length} bandi per te! Ecco i risultati più rilevanti:`;
-        } else {
-          // Risposta testuale normale
-          aiResponse = data.response || data.message || data.reply || data.answer || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+          // Check if this looks like our expected format
+          if (data.success && data.results && Array.isArray(data.results)) {
+            grantResults = data.results;
+            searchInfo = {
+              total_found: data.total_found || data.results.length,
+              search_time: data.search_time || 0
+            };
+            
+            aiResponse = `Ho trovato ${data.total_found || data.results.length} bandi per te! Ecco i risultati più rilevanti:`;
+          } else if (data.output) {
+            // If there's an 'output' field, try to parse that as JSON
+            try {
+              const outputData = JSON.parse(data.output.replace(/```json\n|\n```/g, ''));
+              console.log('Parsed output data:', outputData);
+              
+              if (outputData.success && outputData.results && Array.isArray(outputData.results)) {
+                grantResults = outputData.results;
+                searchInfo = {
+                  total_found: outputData.total_found || outputData.results.length,
+                  search_time: outputData.search_time || 0
+                };
+                
+                aiResponse = `Ho trovato ${outputData.total_found || outputData.results.length} bandi per te! Ecco i risultati più rilevanti:`;
+              } else {
+                aiResponse = data.output || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+              }
+            } catch (outputParseError) {
+              console.log('Could not parse output as JSON, treating as text');
+              aiResponse = data.output || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+            }
+          } else {
+            // Regular response without grant results
+            aiResponse = data.response || data.message || data.reply || data.answer || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+          }
+        } catch (parseError) {
+          console.log('Response is not JSON, treating as plain text');
+          aiResponse = responseText || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
         }
       } else {
         console.error('Webhook error:', response.status, response.statusText);
