@@ -45,16 +45,18 @@ const ChatInterface = () => {
     try {
       console.log('Sending request to webhook:', currentInput);
       
-      const response = await fetch('https://fiscalot.duckdns.org/webhook-test/2f381203-47e1-4fd6-8221-438bad7fee08', {
-        method: 'POST',
+      // Proviamo prima con GET e parametri URL
+      const params = new URLSearchParams({
+        message: currentInput,
+        timestamp: new Date().toISOString(),
+        user_id: 'user_' + Date.now()
+      });
+      
+      const response = await fetch(`https://fiscalot.duckdns.org/webhook-test/2f381203-47e1-4fd6-8221-438bad7fee08?${params}`, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({
-          message: currentInput,
-          timestamp: new Date().toISOString(),
-          user_id: 'user_' + Date.now()
-        }),
       });
 
       let aiResponse = '';
@@ -64,14 +66,17 @@ const ChatInterface = () => {
         console.log('Webhook response:', data);
         
         // Adatta la risposta in base alla struttura che ricevi dal webhook
-        aiResponse = data.response || data.message || data.reply || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+        aiResponse = data.response || data.message || data.reply || data.answer || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
       } else {
         console.error('Webhook error:', response.status, response.statusText);
-        aiResponse = 'Mi dispiace, si è verificato un errore nella comunicazione. Riprova più tardi.';
+        const errorText = await response.text();
+        console.error('Error details:', errorText);
+        
+        aiResponse = 'Mi dispiace, si è verificato un errore nella comunicazione. Il servizio potrebbe non essere configurato correttamente.';
         
         toast({
-          title: "Errore di connessione",
-          description: "Non riesco a connettermi al servizio. Riprova più tardi.",
+          title: "Errore di comunicazione",
+          description: "Il webhook non risponde correttamente. Controlla la configurazione del servizio.",
           variant: "destructive",
         });
       }
@@ -90,7 +95,7 @@ const ChatInterface = () => {
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Si è verificato un errore di connessione. Verifica che il servizio sia attivo e riprova.',
+        text: 'Si è verificato un errore di connessione. Verifica che il servizio sia attivo e raggiungibile.',
         isUser: false,
         timestamp: new Date()
       };
@@ -99,7 +104,7 @@ const ChatInterface = () => {
       
       toast({
         title: "Errore di rete",
-        description: "Impossibile connettersi al servizio. Controlla la connessione e riprova.",
+        description: "Impossibile connettersi al servizio. Controlla la connessione e la configurazione del webhook.",
         variant: "destructive",
       });
     } finally {
