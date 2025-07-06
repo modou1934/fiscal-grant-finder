@@ -54,17 +54,20 @@ const ChatInterface = () => {
 
   const handleSaveGrant = (grant: GrantResult) => {
     const grantId = grant.title + grant.entity; // Create a unique ID
-    setSavedGrants(prev => 
-      prev.includes(grantId) 
+    setSavedGrants(prev => {
+      const isAlreadySaved = prev.includes(grantId);
+      const newSavedGrants = isAlreadySaved 
         ? prev.filter(id => id !== grantId)
-        : [...prev, grantId]
-    );
-    
-    toast({
-      title: prev.includes(grantId) ? "Bando rimosso" : "Bando salvato",
-      description: prev.includes(grantId) 
-        ? "Il bando è stato rimosso dai salvati" 
-        : "Il bando è stato aggiunto ai salvati",
+        : [...prev, grantId];
+      
+      toast({
+        title: isAlreadySaved ? "Bando rimosso" : "Bando salvato",
+        description: isAlreadySaved 
+          ? "Il bando è stato rimosso dai salvati" 
+          : "Il bando è stato aggiunto ai salvati",
+      });
+      
+      return newSavedGrants;
     });
   };
 
