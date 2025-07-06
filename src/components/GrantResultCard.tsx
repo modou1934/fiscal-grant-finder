@@ -19,7 +19,7 @@ interface GrantResult {
   relevance_score: number;
   complexity_score: number;
   success_probability: number;
-  urgency_level: number;
+  urgency_level?: number;
   keywords: string[];
 }
 
@@ -122,10 +122,12 @@ const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant, onSave, isSave
               <TrendingUp className="w-3 h-3 mr-1" />
               <span>Successo: {grant.success_probability.toFixed(1)}/10</span>
             </div>
-            <div className={`flex items-center ${getUrgencyColor(grant.urgency_level)}`}>
-              <Clock className="w-3 h-3 mr-1" />
-              <span>Urgenza: {grant.urgency_level}/10</span>
-            </div>
+            {grant.urgency_level !== undefined && (
+              <div className={`flex items-center ${getUrgencyColor(grant.urgency_level)}`}>
+                <Clock className="w-3 h-3 mr-1" />
+                <span>Urgenza: {grant.urgency_level}/10</span>
+              </div>
+            )}
           </div>
         </div>
         
