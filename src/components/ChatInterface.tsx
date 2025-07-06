@@ -3,15 +3,39 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, MessageSquare, Bot } from 'lucide-react';
+import { Send, MessageSquare, Bot, Search } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import GrantResultCard from './GrantResultCard';
 
 interface Message {
   id: string;
   text: string;
   isUser: boolean;
   timestamp: Date;
+  grantResults?: GrantResult[];
+  searchInfo?: {
+    total_found: number;
+    search_time: number;
+  };
+}
+
+interface GrantResult {
+  title: string;
+  entity: string;
+  description: string;
+  sectors: string[];
+  target_size: string;
+  total_budget: string;
+  max_contribution: string;
+  deadline: string;
+  regions: string[];
+  url: string;
+  relevance_score: number;
+  complexity_score: number;
+  success_probability: number;
+  urgency_level: number;
+  keywords: string[];
 }
 
 const ChatInterface = () => {
@@ -25,7 +49,24 @@ const ChatInterface = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [savedGrants, setSavedGrants] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const handleSaveGrant = (grant: GrantResult) => {
+    const grantId = grant.title + grant.entity; // Create a unique ID
+    setSavedGrants(prev => 
+      prev.includes(grantId) 
+        ? prev.filter(id => id !== grantId)
+        : [...prev, grantId]
+    );
+    
+    toast({
+      title: prev.includes(grantId) ? "Bando rimosso" : "Bando salvato",
+      description: prev.includes(grantId) 
+        ? "Il bando è stato rimosso dai salvati" 
+        : "Il bando è stato aggiunto ai salvati",
+    });
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -45,7 +86,6 @@ const ChatInterface = () => {
     try {
       console.log('Sending request to webhook:', currentInput);
       
-      // Proviamo prima con GET e parametri URL
       const params = new URLSearchParams({
         message: currentInput,
         timestamp: new Date().toISOString(),
@@ -60,13 +100,26 @@ const ChatInterface = () => {
       });
 
       let aiResponse = '';
+      let grantResults: GrantResult[] = [];
+      let searchInfo = undefined;
       
       if (response.ok) {
         const data = await response.json();
         console.log('Webhook response:', data);
         
-        // Adatta la risposta in base alla struttura che ricevi dal webhook
-        aiResponse = data.response || data.message || data.reply || data.answer || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+        // Controlla se la risposta contiene risultati di bandi
+        if (data.success && data.results && Array.isArray(data.results)) {
+          grantResults = data.results;
+          searchInfo = {
+            total_found: data.total_found || data.results.length,
+            search_time: data.search_time || 0
+          };
+          
+          aiResponse = `Ho trovato ${data.total_found || data.results.length} bandi per te! Ecco i risultati più rilevanti:`;
+        } else {
+          // Risposta testuale normale
+          aiResponse = data.response || data.message || data.reply || data.answer || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+        }
       } else {
         console.error('Webhook error:', response.status, response.statusText);
         const errorText = await response.text();
@@ -85,7 +138,9 @@ const ChatInterface = () => {
         id: (Date.now() + 1).toString(),
         text: aiResponse,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        grantResults: grantResults.length > 0 ? grantResults : undefined,
+        searchInfo
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -120,7 +175,7 @@ const ChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-w-4xl mx-auto">
+    <div className="flex flex-col h-[600px] max-w-6xl mx-auto">
       <Card className="flex-1 flex flex-col shadow-lg border-0">
         <CardHeader className="bg-gradient-to-r from-brand-navy to-brand-emerald text-white">
           <CardTitle className="flex items-center">
@@ -133,30 +188,56 @@ const ChatInterface = () => {
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                >
+                <div key={message.id} className="space-y-4">
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                      message.isUser
-                        ? 'bg-brand-navy text-white ml-4'
-                        : 'bg-gray-100 text-gray-800 mr-4'
-                    }`}
+                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div className="flex items-start space-x-2">
-                      {!message.isUser && (
-                        <MessageSquare className="w-4 h-4 mt-1 flex-shrink-0" />
-                      )}
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                    <div
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        message.isUser
+                          ? 'bg-brand-navy text-white ml-4'
+                          : 'bg-gray-100 text-gray-800 mr-4'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-2">
+                        {!message.isUser && (
+                          <MessageSquare className="w-4 h-4 mt-1 flex-shrink-0" />
+                        )}
+                        <div className="flex-1">
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                          {message.searchInfo && (
+                            <div className="flex items-center space-x-4 mt-2 text-xs opacity-80">
+                              <div className="flex items-center">
+                                <Search className="w-3 h-3 mr-1" />
+                                <span>{message.searchInfo.total_found} risultati</span>
+                              </div>
+                              <span>Tempo: {message.searchInfo.search_time.toFixed(1)}s</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-xs opacity-70 mt-2">
+                        {message.timestamp.toLocaleTimeString('it-IT', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
                     </div>
-                    <p className="text-xs opacity-70 mt-2">
-                      {message.timestamp.toLocaleTimeString('it-IT', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </p>
                   </div>
+                  
+                  {/* Visualizza i risultati dei bandi */}
+                  {message.grantResults && message.grantResults.length > 0 && (
+                    <div className="grid md:grid-cols-2 gap-4 mt-4">
+                      {message.grantResults.map((grant, index) => (
+                        <GrantResultCard
+                          key={`${grant.title}-${index}`}
+                          grant={grant}
+                          onSave={handleSaveGrant}
+                          isSaved={savedGrants.includes(grant.title + grant.entity)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
               
