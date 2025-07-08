@@ -73,9 +73,29 @@ const ChatInterface = () => {
   // Funzione per estrarre e parsare il JSON dalla risposta
   const parseGrantsFromResponse = (responseText: string) => {
     try {
+      console.log('Tentativo di parsing risposta:', responseText);
+      
       // Prima prova a parsare direttamente come JSON
       const directParse = JSON.parse(responseText);
-      if (directParse && directParse.success && directParse.results) {
+      
+      // Caso 1: Array con oggetto che contiene i dati
+      if (Array.isArray(directParse) && directParse.length > 0) {
+        const firstElement = directParse[0];
+        if (firstElement && firstElement.success !== undefined && firstElement.results) {
+          return {
+            success: true,
+            data: firstElement,
+            grantResults: firstElement.results,
+            searchInfo: {
+              total_found: firstElement.total_found || firstElement.results.length,
+              search_time: firstElement.search_time || 0
+            }
+          };
+        }
+      }
+      
+      // Caso 2: Oggetto diretto con i dati
+      if (directParse && directParse.success !== undefined && directParse.results) {
         return {
           success: true,
           data: directParse,
@@ -87,7 +107,7 @@ const ChatInterface = () => {
         };
       }
     } catch (e) {
-      // Se il parsing diretto fallisce, cerca JSON nel testo
+      console.log('Parsing diretto fallito, tentativo con markdown:', e);
     }
 
     // Cerca JSON in blocchi markdown
@@ -95,14 +115,21 @@ const ChatInterface = () => {
     if (jsonMatches && jsonMatches[1]) {
       try {
         const parsedData = JSON.parse(jsonMatches[1]);
-        if (parsedData && parsedData.success && parsedData.results) {
+        
+        // Gestisce sia array che oggetto diretto
+        let finalData = parsedData;
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          finalData = parsedData[0];
+        }
+        
+        if (finalData && finalData.success !== undefined && finalData.results) {
           return {
             success: true,
-            data: parsedData,
-            grantResults: parsedData.results,
+            data: finalData,
+            grantResults: finalData.results,
             searchInfo: {
-              total_found: parsedData.total_found || parsedData.results.length,
-              search_time: parsedData.search_time || 0
+              total_found: finalData.total_found || finalData.results.length,
+              search_time: finalData.search_time || 0
             }
           };
         }
@@ -112,19 +139,26 @@ const ChatInterface = () => {
     }
 
     // Cerca pattern JSON nel testo (anche senza markdown)
-    const jsonPattern = /\{[\s\S]*"success"[\s\S]*"results"[\s\S]*\}/;
+    const jsonPattern = /\[?\{[\s\S]*"success"[\s\S]*"results"[\s\S]*\}\]?/;
     const jsonMatch = responseText.match(jsonPattern);
     if (jsonMatch) {
       try {
         const parsedData = JSON.parse(jsonMatch[0]);
-        if (parsedData && parsedData.success && parsedData.results) {
+        
+        // Gestisce sia array che oggetto diretto
+        let finalData = parsedData;
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          finalData = parsedData[0];
+        }
+        
+        if (finalData && finalData.success !== undefined && finalData.results) {
           return {
             success: true,
-            data: parsedData,
-            grantResults: parsedData.results,
+            data: finalData,
+            grantResults: finalData.results,
             searchInfo: {
-              total_found: parsedData.total_found || parsedData.results.length,
-              search_time: parsedData.search_time || 0
+              total_found: finalData.total_found || finalData.results.length,
+              search_time: finalData.search_time || 0
             }
           };
         }
@@ -133,6 +167,7 @@ const ChatInterface = () => {
       }
     }
 
+    console.log('Nessun formato JSON valido trovato nella risposta');
     return {
       success: false,
       data: null,

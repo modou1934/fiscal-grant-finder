@@ -54,12 +54,17 @@ export const parseN8NData = (rawData: any): ParseResult => {
     // Caso 2: Array che contiene l'oggetto (nuovo formato)
     else if (Array.isArray(rawData) && rawData.length > 0) {
       console.log('Parsing array formato...');
-      if (rawData[0]?.output) {
+      // Controlla se il primo elemento ha la struttura corretta
+      const firstElement = rawData[0];
+      if (firstElement?.output) {
         // Formato N8N con output come stringa
-        parsedData = JSON.parse(rawData[0].output);
+        parsedData = JSON.parse(firstElement.output);
+      } else if (firstElement?.success !== undefined && firstElement?.results) {
+        // Array diretto con oggetto che ha già la struttura corretta
+        parsedData = firstElement;
       } else {
-        // Array diretto con oggetto
-        parsedData = rawData[0];
+        // Fallback: usa il primo elemento
+        parsedData = firstElement;
       }
     }
     // Caso 3: Oggetto JSON diretto
@@ -72,10 +77,28 @@ export const parseN8NData = (rawData: any): ParseResult => {
       throw new Error('Formato dati non riconosciuto');
     }
     
+    console.log('Dati parsati:', parsedData);
+    
     // Validazione della struttura
     if (!parsedData || !parsedData.results || !Array.isArray(parsedData.results)) {
       console.error('Struttura dati non valida:', parsedData);
       throw new Error('Struttura dati non valida: manca l\'array results');
+    }
+    
+    // Validazione dei campi obbligatori
+    if (parsedData.success === undefined) {
+      console.warn('Campo success mancante, assumendo true');
+      parsedData.success = true;
+    }
+    
+    if (!parsedData.total_found) {
+      console.warn('Campo total_found mancante, calcolando dalla lunghezza results');
+      parsedData.total_found = parsedData.results.length;
+    }
+    
+    if (!parsedData.search_time) {
+      console.warn('Campo search_time mancante, impostando default');
+      parsedData.search_time = 0;
     }
     
     console.log('Parsing completato con successo, trovati', parsedData.results.length, 'risultati');
@@ -88,6 +111,7 @@ export const parseN8NData = (rawData: any): ParseResult => {
     
   } catch (error) {
     console.error('Errore nel parsing dei dati:', error);
+    console.error('Dati raw ricevuti:', rawData);
     return {
       success: false,
       data: null,
