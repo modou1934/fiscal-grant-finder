@@ -41,6 +41,17 @@ export const parseN8NData = (rawData: any): ParseResult => {
     // Caso 1: Stringa JSON da parsare
     if (typeof rawData === 'string') {
       console.log('Parsing stringa JSON...');
+      
+      // Controlla se la stringa è vuota o contiene solo spazi
+      if (!rawData || rawData.trim() === '') {
+        console.error('Ricevuta stringa JSON vuota o invalida dal webhook');
+        return {
+          success: false,
+          data: null,
+          error: 'Received empty or invalid JSON string from webhook'
+        };
+      }
+      
       const parsed = JSON.parse(rawData);
       
       // Se è un array, prende il primo elemento
