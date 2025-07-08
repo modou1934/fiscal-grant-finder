@@ -59,6 +59,85 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Capacitor (for mobile apps)
+
+## Mobile Development
+
+This app can be built as a native mobile app for Android and iOS using Capacitor.
+
+### Prerequisites for Mobile Development
+
+**For Android:**
+- Android Studio
+- Android SDK
+- Java Development Kit (JDK) 11 or higher
+
+**For iOS:**
+- Xcode 12 or higher
+- macOS (required for iOS development)
+- iOS SDK
+
+### Mobile Development Commands
+
+```sh
+# Build the web app and sync with mobile platforms
+npm run build:mobile
+
+# Add mobile platforms (run once)
+npm run add:android
+npm run add:ios
+
+# Run on Android device/emulator
+npm run android
+
+# Run on iOS device/simulator
+npm run ios
+
+# Open in Android Studio
+npm run open:android
+
+# Open in Xcode
+npm run open:ios
+
+# Sync web assets with mobile platforms
+npm run sync
+```
+
+### First Time Mobile Setup
+
+1. Build the web app:
+   ```sh
+   npm run build
+   ```
+
+2. Add the mobile platforms:
+   ```sh
+   npm run add:android
+   npm run add:ios
+   ```
+
+3. Sync the web assets:
+   ```sh
+   npm run sync
+   ```
+
+4. Open in the respective IDE:
+   ```sh
+   npm run open:android  # Opens Android Studio
+   npm run open:ios      # Opens Xcode
+   ```
+
+### Mobile Features
+
+The mobile app includes:
+- Native status bar styling
+- Splash screen
+- Keyboard handling
+- Network status monitoring
+- Device information access
+- Safe area handling for devices with notches
+- Touch optimizations
+- Hardware back button support (Android)
 
 ## How can I deploy this project?
 
