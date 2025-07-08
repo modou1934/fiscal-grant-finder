@@ -111,31 +111,46 @@ const ChatInterface = () => {
         console.log('Raw webhook response:', responseText);
         
         try {
-          // First, try to extract JSON from potentially malformed response
-          let cleanJsonString = responseText;
+          console.log('Raw response first 500 chars:', responseText.substring(0, 500));
           
-          // Check if response contains markdown-wrapped JSON
-          const jsonMatch = responseText.match(/```json\s*\n?([\s\S]*?)\n?```/);
-          if (jsonMatch) {
-            cleanJsonString = jsonMatch[1];
-            console.log('Extracted JSON from markdown:', cleanJsonString);
+          // The webhook returns a malformed JSON structure - need to extract the actual data
+          let actualData = null;
+          
+          // Try to find JSON in the response
+          const jsonMatches = responseText.match(/```json\s*\n?([\s\S]*?)\n?```/);
+          if (jsonMatches && jsonMatches[1]) {
+            console.log('Found JSON in markdown, attempting to parse...');
+            try {
+              actualData = JSON.parse(jsonMatches[1]);
+              console.log('Successfully parsed markdown JSON:', actualData);
+            } catch (mdError) {
+              console.log('Failed to parse markdown JSON:', mdError);
+            }
           }
           
-          // Parse the cleaned JSON
-          const data = JSON.parse(cleanJsonString);
-          console.log('Parsed webhook response:', data);
+          // If no markdown JSON found, try to parse the whole response
+          if (!actualData) {
+            try {
+              actualData = JSON.parse(responseText);
+              console.log('Successfully parsed full response as JSON:', actualData);
+            } catch (fullError) {
+              console.log('Failed to parse full response as JSON:', fullError);
+            }
+          }
           
-          if (data.success && data.results && Array.isArray(data.results)) {
-            grantResults = data.results;
+          // If we have parsed data, check for grant results
+          if (actualData && actualData.success && actualData.results && Array.isArray(actualData.results)) {
+            grantResults = actualData.results;
             searchInfo = {
-              total_found: data.total_found || data.results.length,
-              search_time: data.search_time || 0
+              total_found: actualData.total_found || actualData.results.length,
+              search_time: actualData.search_time || 0
             };
-            aiResponse = `Ho trovato ${data.total_found || data.results.length} bandi per te! Ecco i risultati più rilevanti:`;
-            console.log('Successfully parsed grant results:', grantResults.length);
+            aiResponse = `Ho trovato ${actualData.total_found || actualData.results.length} bandi per te! Ecco i risultati più rilevanti:`;
+            console.log('Successfully extracted grant results:', grantResults.length);
           } else {
-            // No structured results found, use text response
-            aiResponse = data.response || data.message || data.text || responseText || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+            // No valid data found, show raw response
+            console.log('No valid grant data found, showing raw response');
+            aiResponse = responseText.substring(0, 500) + '...';
           }
           
         } catch (parseError) {
