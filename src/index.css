@@ -106,6 +106,42 @@ All colors MUST be HSL.
 }
 
 @layer components {
+  /* Stili specifici per app mobile */
+  .mobile-app {
+    @apply touch-manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Safe area per dispositivi con notch */
+  .pt-safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .pb-safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pl-safe-area-inset-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .pr-safe-area-inset-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Miglioramenti touch per mobile */
+  .mobile-app button,
+  .mobile-app .hover-lift {
+    @apply active:scale-95 transition-transform duration-150;
+  }
+  
+  .mobile-app input,
+  .mobile-app textarea {
+    @apply text-base; /* Previene zoom su iOS */
+  }
+
   .gradient-text {
     @apply bg-gradient-to-r from-brand-navy via-brand-gold to-brand-emerald bg-clip-text text-transparent;
   }
