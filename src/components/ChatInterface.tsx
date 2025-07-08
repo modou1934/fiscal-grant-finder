@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -71,6 +70,77 @@ const ChatInterface = () => {
     });
   };
 
+  // Funzione per estrarre e parsare il JSON dalla risposta
+  const parseGrantsFromResponse = (responseText: string) => {
+    try {
+      // Prima prova a parsare direttamente come JSON
+      const directParse = JSON.parse(responseText);
+      if (directParse && directParse.success && directParse.results) {
+        return {
+          success: true,
+          data: directParse,
+          grantResults: directParse.results,
+          searchInfo: {
+            total_found: directParse.total_found || directParse.results.length,
+            search_time: directParse.search_time || 0
+          }
+        };
+      }
+    } catch (e) {
+      // Se il parsing diretto fallisce, cerca JSON nel testo
+    }
+
+    // Cerca JSON in blocchi markdown
+    const jsonMatches = responseText.match(/```json\s*\n?([\s\S]*?)\n?```/);
+    if (jsonMatches && jsonMatches[1]) {
+      try {
+        const parsedData = JSON.parse(jsonMatches[1]);
+        if (parsedData && parsedData.success && parsedData.results) {
+          return {
+            success: true,
+            data: parsedData,
+            grantResults: parsedData.results,
+            searchInfo: {
+              total_found: parsedData.total_found || parsedData.results.length,
+              search_time: parsedData.search_time || 0
+            }
+          };
+        }
+      } catch (e) {
+        console.log('Failed to parse markdown JSON:', e);
+      }
+    }
+
+    // Cerca pattern JSON nel testo (anche senza markdown)
+    const jsonPattern = /\{[\s\S]*"success"[\s\S]*"results"[\s\S]*\}/;
+    const jsonMatch = responseText.match(jsonPattern);
+    if (jsonMatch) {
+      try {
+        const parsedData = JSON.parse(jsonMatch[0]);
+        if (parsedData && parsedData.success && parsedData.results) {
+          return {
+            success: true,
+            data: parsedData,
+            grantResults: parsedData.results,
+            searchInfo: {
+              total_found: parsedData.total_found || parsedData.results.length,
+              search_time: parsedData.search_time || 0
+            }
+          };
+        }
+      } catch (e) {
+        console.log('Failed to parse extracted JSON:', e);
+      }
+    }
+
+    return {
+      success: false,
+      data: null,
+      grantResults: [],
+      searchInfo: null
+    };
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -110,53 +180,20 @@ const ChatInterface = () => {
         const responseText = await response.text();
         console.log('Raw webhook response:', responseText);
         
-        try {
-          console.log('Raw response first 500 chars:', responseText.substring(0, 500));
-          
-          // The webhook returns a malformed JSON structure - need to extract the actual data
-          let actualData = null;
-          
-          // Try to find JSON in the response
-          const jsonMatches = responseText.match(/```json\s*\n?([\s\S]*?)\n?```/);
-          if (jsonMatches && jsonMatches[1]) {
-            console.log('Found JSON in markdown, attempting to parse...');
-            try {
-              actualData = JSON.parse(jsonMatches[1]);
-              console.log('Successfully parsed markdown JSON:', actualData);
-            } catch (mdError) {
-              console.log('Failed to parse markdown JSON:', mdError);
-            }
-          }
-          
-          // If no markdown JSON found, try to parse the whole response
-          if (!actualData) {
-            try {
-              actualData = JSON.parse(responseText);
-              console.log('Successfully parsed full response as JSON:', actualData);
-            } catch (fullError) {
-              console.log('Failed to parse full response as JSON:', fullError);
-            }
-          }
-          
-          // If we have parsed data, check for grant results
-          if (actualData && actualData.success && actualData.results && Array.isArray(actualData.results)) {
-            grantResults = actualData.results;
-            searchInfo = {
-              total_found: actualData.total_found || actualData.results.length,
-              search_time: actualData.search_time || 0
-            };
-            aiResponse = `Ho trovato ${actualData.total_found || actualData.results.length} bandi per te! Ecco i risultati più rilevanti:`;
-            console.log('Successfully extracted grant results:', grantResults.length);
-          } else {
-            // No valid data found, show raw response
-            console.log('No valid grant data found, showing raw response');
-            aiResponse = responseText.substring(0, 500) + '...';
-          }
-          
-        } catch (parseError) {
-          console.log('Response is not valid JSON, treating as plain text:', parseError);
-          aiResponse = responseText || 'Ho ricevuto la tua richiesta e sto elaborando una risposta.';
+        // Usa la nuova funzione di parsing
+        const parseResult = parseGrantsFromResponse(responseText);
+        
+        if (parseResult.success && parseResult.grantResults.length > 0) {
+          grantResults = parseResult.grantResults;
+          searchInfo = parseResult.searchInfo;
+          aiResponse = `Ho trovato ${parseResult.searchInfo?.total_found || parseResult.grantResults.length} bandi per te! Ecco i risultati più rilevanti:`;
+          console.log('Successfully extracted grant results:', grantResults.length);
+        } else {
+          // Se non ci sono bandi validi, mostra la risposta completa
+          aiResponse = responseText;
+          console.log('No valid grant data found, showing full response');
         }
+        
       } else {
         console.error('Webhook error:', response.status, response.statusText);
         const errorText = await response.text();
@@ -212,7 +249,7 @@ const ChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-w-6xl mx-auto">
+    <div className="flex flex-col h-[700px] max-w-6xl mx-auto">
       <Card className="flex-1 flex flex-col shadow-lg border-0">
         <CardHeader className="bg-gradient-to-r from-brand-navy to-brand-emerald text-white">
           <CardTitle className="flex items-center">
@@ -223,14 +260,14 @@ const ChatInterface = () => {
         
         <CardContent className="flex-1 flex flex-col p-0">
           <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
+            <div className="space-y-6">
               {messages.map((message) => (
                 <div key={message.id} className="space-y-4">
                   <div
                     className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
+                      className={`max-w-[80%] p-4 rounded-lg ${
                         message.isUser
                           ? 'bg-brand-navy text-white ml-4'
                           : 'bg-gray-100 text-gray-800 mr-4'
@@ -241,9 +278,11 @@ const ChatInterface = () => {
                           <MessageSquare className="w-4 h-4 mt-1 flex-shrink-0" />
                         )}
                         <div className="flex-1">
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                          <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            {message.text}
+                          </div>
                           {message.searchInfo && (
-                            <div className="flex items-center space-x-4 mt-2 text-xs opacity-80">
+                            <div className="flex items-center space-x-4 mt-3 text-xs opacity-80">
                               <div className="flex items-center">
                                 <Search className="w-3 h-3 mr-1" />
                                 <span>{message.searchInfo.total_found} risultati</span>
@@ -264,7 +303,7 @@ const ChatInterface = () => {
                   
                   {/* Visualizza i risultati dei bandi */}
                   {message.grantResults && message.grantResults.length > 0 && (
-                    <div className="grid md:grid-cols-2 gap-4 mt-4">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                       {message.grantResults.map((grant, index) => (
                         <GrantResultCard
                           key={`${grant.title}-${index}`}
@@ -280,7 +319,7 @@ const ChatInterface = () => {
               
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-800 p-3 rounded-lg mr-8">
+                  <div className="bg-gray-100 text-gray-800 p-4 rounded-lg mr-8">
                     <div className="flex items-center space-x-2">
                       <MessageSquare className="w-4 h-4" />
                       <div className="flex space-x-1">
