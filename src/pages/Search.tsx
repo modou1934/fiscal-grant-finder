@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search as SearchIcon, ArrowLeft, Filter, SlidersHorizontal } from 'lucide-react';
+import { Search as SearchIcon, ArrowLeft, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import ChatInterface from '@/components/ChatInterface';
-import GrantCard from '@/components/GrantCard';
+import BandiCards from '@/components/BandiCards';
+import { parseN8NData } from '@/utils/dataParser';
+import { useToast } from '@/hooks/use-toast';
 
 // Dati di esempio per i bandi
 const sampleGrants = [
@@ -49,8 +50,12 @@ const sampleGrants = [
 const Search = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const [searchMode, setSearchMode] = useState<'chat' | 'traditional'>('chat');
-  const [savedGrants, setSavedGrants] = useState<string[]>([]);
+  const [keywords, setKeywords] = useState('');
+  const [sector, setSector] = useState('');
+  const [region, setRegion] = useState('');
+  const [bandiData, setBandiData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     try {
@@ -60,12 +65,67 @@ const Search = () => {
     }
   };
 
-  const handleSaveGrant = (grant: any) => {
-    setSavedGrants(prev => 
-      prev.includes(grant.id) 
-        ? prev.filter(id => id !== grant.id)
-        : [...prev, grant.id]
-    );
+  const handleSearch = async () => {
+    if (!keywords.trim() && !sector.trim() && !region.trim()) {
+      toast({
+        title: "Attenzione",
+        description: "Inserisci almeno un criterio di ricerca",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const searchQuery = `Cerco bandi per: ${keywords}${sector ? `, settore: ${sector}` : ''}${region ? `, regione: ${region}` : ''}`;
+      
+      const params = new URLSearchParams({
+        message: searchQuery,
+        timestamp: new Date().toISOString(),
+        user_id: 'user_' + Date.now()
+      });
+      
+      const response = await fetch(`https://fiscalot.duckdns.org/webhook-test/2f381203-47e1-4fd6-8221-438bad7fee08?${params}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const responseText = await response.text();
+        console.log('Raw webhook response:', responseText);
+        
+        const parseResult = parseN8NData(responseText);
+        
+        if (parseResult.success && parseResult.data) {
+          setBandiData(parseResult.data);
+          toast({
+            title: "Ricerca completata",
+            description: `Trovati ${parseResult.data.total_found} bandi`,
+          });
+        } else {
+          console.error('Parsing failed:', parseResult.error);
+          toast({
+            title: "Errore",
+            description: "Impossibile elaborare la risposta del server",
+            variant: "destructive",
+          });
+        }
+      } else {
+        throw new Error('Errore nella risposta del server');
+      }
+    } catch (error) {
+      console.error('Error calling webhook:', error);
+      toast({
+        title: "Errore di connessione",
+        description: "Impossibile connettersi al servizio. Controlla la connessione.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -112,81 +172,58 @@ const Search = () => {
       {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">
-          {/* Mode Toggle */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="bg-white rounded-lg p-1 shadow-sm border">
-              <Button
-                variant={searchMode === 'chat' ? 'default' : 'ghost'}
-                onClick={() => setSearchMode('chat')}
-                className={`${searchMode === 'chat' ? 'bg-brand-navy text-white' : 'text-gray-600'}`}
-              >
-                💬 Ricerca Chat
-              </Button>
-              <Button
-                variant={searchMode === 'traditional' ? 'default' : 'ghost'}
-                onClick={() => setSearchMode('traditional')}
-                className={`${searchMode === 'traditional' ? 'bg-brand-navy text-white' : 'text-gray-600'}`}
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Ricerca Tradizionale
-              </Button>
+          <div className="space-y-8">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-brand-navy mb-4">
+                Ricerca Bandi di Finanziamento
+              </h1>
+              <p className="text-xl text-gray-600">
+                Trova i bandi più adatti alle tue esigenze
+              </p>
             </div>
-          </div>
 
-          {searchMode === 'chat' ? (
-            <div className="space-y-8">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-brand-navy mb-4">
-                  Ricerca Intelligente con AI
-                </h1>
-                <p className="text-xl text-gray-600">
-                  Descrivi il tipo di finanziamento che cerchi e trova i bandi più adatti
-                </p>
-              </div>
-              
-              <ChatInterface />
-            </div>
-          ) : (
-            <div className="space-y-8">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-brand-navy mb-4">
-                  Esplora i Bandi Disponibili
-                </h1>
-                <p className="text-xl text-gray-600">
-                  Sfoglia e filtra i bandi in base alle tue esigenze
-                </p>
-              </div>
-
-              {/* Search and Filters */}
-              <Card className="shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <SlidersHorizontal className="w-5 h-5 mr-2" />
-                    Filtri di Ricerca
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <Input placeholder="Cerca per parole chiave..." />
-                    <Input placeholder="Settore..." />
-                    <Input placeholder="Regione..." />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Results */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sampleGrants.map((grant) => (
-                  <GrantCard
-                    key={grant.id}
-                    grant={grant}
-                    onSave={handleSaveGrant}
-                    isSaved={savedGrants.includes(grant.id)}
+            {/* Search and Filters */}
+            <Card className="shadow-lg border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <SlidersHorizontal className="w-5 h-5 mr-2" />
+                  Filtri di Ricerca
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4 mb-4">
+                  <Input 
+                    placeholder="Cerca per parole chiave..." 
+                    value={keywords}
+                    onChange={(e) => setKeywords(e.target.value)}
                   />
-                ))}
-              </div>
-            </div>
-          )}
+                  <Input 
+                    placeholder="Settore..." 
+                    value={sector}
+                    onChange={(e) => setSector(e.target.value)}
+                  />
+                  <Input 
+                    placeholder="Regione..." 
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                    className="bg-brand-navy hover:bg-brand-navy/90"
+                  >
+                    <SearchIcon className="w-4 h-4 mr-2" />
+                    {isLoading ? 'Ricerca in corso...' : 'Cerca Bandi'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Results */}
+            <BandiCards bandiData={bandiData} />
+          </div>
         </div>
       </div>
     </div>
