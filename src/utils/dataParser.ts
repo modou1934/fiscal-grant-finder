@@ -38,20 +38,34 @@ export const parseN8NData = (rawData: any): ParseResult => {
   try {
     let parsedData;
     
-    // Caso 1: Formato attuale - array con oggetto contenente output come stringa JSON
-    if (Array.isArray(rawData) && rawData[0]?.output) {
-      console.log('Parsing formato attuale N8N...');
-      parsedData = JSON.parse(rawData[0].output);
-    }
-    // Caso 2: Formato semplificato - oggetto JSON diretto
-    else if (typeof rawData === 'object' && rawData.results) {
-      console.log('Parsing formato semplificato...');
-      parsedData = rawData;
-    }
-    // Caso 3: Stringa JSON
-    else if (typeof rawData === 'string') {
+    // Caso 1: Stringa JSON da parsare
+    if (typeof rawData === 'string') {
       console.log('Parsing stringa JSON...');
-      parsedData = JSON.parse(rawData);
+      const parsed = JSON.parse(rawData);
+      
+      // Se è un array, prende il primo elemento
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        console.log('Formato array, prendendo primo elemento...');
+        parsedData = parsed[0];
+      } else {
+        parsedData = parsed;
+      }
+    }
+    // Caso 2: Array che contiene l'oggetto (nuovo formato)
+    else if (Array.isArray(rawData) && rawData.length > 0) {
+      console.log('Parsing array formato...');
+      if (rawData[0]?.output) {
+        // Formato N8N con output come stringa
+        parsedData = JSON.parse(rawData[0].output);
+      } else {
+        // Array diretto con oggetto
+        parsedData = rawData[0];
+      }
+    }
+    // Caso 3: Oggetto JSON diretto
+    else if (typeof rawData === 'object' && rawData !== null) {
+      console.log('Parsing oggetto diretto...');
+      parsedData = rawData;
     }
     // Caso 4: Formato non riconosciuto
     else {
@@ -59,9 +73,12 @@ export const parseN8NData = (rawData: any): ParseResult => {
     }
     
     // Validazione della struttura
-    if (!parsedData.results || !Array.isArray(parsedData.results)) {
+    if (!parsedData || !parsedData.results || !Array.isArray(parsedData.results)) {
+      console.error('Struttura dati non valida:', parsedData);
       throw new Error('Struttura dati non valida: manca l\'array results');
     }
+    
+    console.log('Parsing completato con successo, trovati', parsedData.results.length, 'risultati');
     
     return {
       success: true,
