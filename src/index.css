@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -106,51 +106,151 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  /* Stili specifici per app mobile */
+  /* App-style components */
+  .app-container {
+    @apply min-h-screen bg-background text-foreground;
+  }
+  
+  .page-header {
+    @apply mb-8 space-y-2;
+  }
+  
+  .page-title {
+    @apply text-3xl font-bold tracking-tight text-foreground;
+  }
+  
+  .page-description {
+    @apply text-muted-foreground text-lg;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer;
+  }
+  
+  .button-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm;
+  }
+  
+  .button-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
+  }
+  
+  .input-focus {
+    @apply focus:ring-2 focus:ring-primary focus:border-primary;
+  }
+  
+  /* Glass morphism effects */
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+  
+  .glass-button {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-300;
+  }
+  
+  /* Professional gradients */
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary via-primary/90 to-accent;
+  }
+  
+  .gradient-secondary {
+    @apply bg-gradient-to-r from-secondary/20 via-accent/20 to-primary/20;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent;
+  }
+  
+  /* App-specific animations */
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+  }
+  
+  .animate-slide-in-left {
+    animation: slide-in-left 0.3s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out;
+  }
+  
+  /* Status indicators */
+  .status-active {
+    @apply bg-green-100 text-green-800 border border-green-200;
+  }
+  
+  .status-pending {
+    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+  }
+  
+  .status-inactive {
+    @apply bg-gray-100 text-gray-800 border border-gray-200;
+  }
+  
+  /* Mobile-specific styles */
   .mobile-app {
-    @apply touch-manipulation;
+    @apply touch-manipulation select-none;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Safe area per dispositivi con notch */
-  .pt-safe-area-inset-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  
-  .pb-safe-area-inset-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  .pl-safe-area-inset-left {
-    padding-left: env(safe-area-inset-left);
-  }
-  
-  .pr-safe-area-inset-right {
-    padding-right: env(safe-area-inset-right);
-  }
-  
-  /* Miglioramenti touch per mobile */
   .mobile-app button,
-  .mobile-app .hover-lift {
+  .mobile-app .touchable {
     @apply active:scale-95 transition-transform duration-150;
   }
   
   .mobile-app input,
   .mobile-app textarea {
-    @apply text-base; /* Previene zoom su iOS */
+    @apply text-base; /* Prevents zoom on iOS */
   }
-
-  .gradient-text {
-    @apply bg-gradient-to-r from-brand-navy via-brand-gold to-brand-emerald bg-clip-text text-transparent;
+  
+  /* Safe area handling */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
   }
-
-  .glass-card {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
   }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
 
-  .hover-lift {
-    @apply transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl;
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

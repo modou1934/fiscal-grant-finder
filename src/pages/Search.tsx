@@ -139,120 +139,79 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-light via-white to-blue-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost"
-                onClick={() => navigate('/dashboard')}
-                className="text-brand-navy hover:bg-brand-navy/10"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Dashboard
-              </Button>
-              
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-brand-navy to-brand-emerald rounded-lg flex items-center justify-center">
-                  <SearchIcon className="w-5 h-5 text-white" />
+    <div className="p-6 space-y-6">
+      {/* Page Header */}
+      <div className="page-header">
+        <h1 className="page-title">Ricerca Bandi</h1>
+        <p className="page-description">
+          Trova i bandi di finanziamento più adatti alle tue esigenze
+        </p>
+      </div>
+
+      {/* Search and Filters */}
+      <Card className="shadow-sm border-0 bg-card">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <SlidersHorizontal className="w-5 h-5 mr-2" />
+            Filtri di Ricerca
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-4 mb-4">
+            <Input 
+              placeholder="Cerca per parole chiave..." 
+              value={keywords}
+              onChange={(e) => setKeywords(e.target.value)}
+              className="input-focus"
+            />
+            <Input 
+              placeholder="Settore..." 
+              value={sector}
+              onChange={(e) => setSector(e.target.value)}
+              className="input-focus"
+            />
+            <Input 
+              placeholder="Regione..." 
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="input-focus"
+            />
+          </div>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleSearch}
+              disabled={isLoading}
+              className="button-primary min-w-40"
+            >
+              <SearchIcon className="w-4 h-4 mr-2" />
+              {isLoading ? 'Ricerca in corso...' : 'Cerca Bandi'}
+            </Button>
+          </div>
+          
+          {/* Loading message */}
+          {isLoading && (
+            <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in">
+              <div className="flex items-center justify-center space-x-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <div className="text-center">
+                  <p className="text-primary font-medium">Ricerca in corso...</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    L'analisi dei bandi può richiedere alcuni minuti. Attendere prego.
+                  </p>
                 </div>
-                <span className="text-xl font-bold text-brand-navy">GrantFinder</span>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user?.user_metadata?.name || user?.email}
-              </span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleSignOut}
-                className="text-gray-600 hover:text-brand-navy"
-              >
-                Esci
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="space-y-8">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-brand-navy mb-4">
-                Ricerca Bandi di Finanziamento
-              </h1>
-              <p className="text-xl text-gray-600">
-                Trova i bandi più adatti alle tue esigenze
-              </p>
-            </div>
-
-            {/* Search and Filters */}
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <SlidersHorizontal className="w-5 h-5 mr-2" />
-                  Filtri di Ricerca
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-4 mb-4">
-                  <Input 
-                    placeholder="Cerca per parole chiave..." 
-                    value={keywords}
-                    onChange={(e) => setKeywords(e.target.value)}
-                  />
-                  <Input 
-                    placeholder="Settore..." 
-                    value={sector}
-                    onChange={(e) => setSector(e.target.value)}
-                  />
-                  <Input 
-                    placeholder="Regione..." 
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                  />
-                </div>
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={handleSearch}
-                    disabled={isLoading}
-                    className="bg-brand-navy hover:bg-brand-navy/90 min-w-40"
-                  >
-                    <SearchIcon className="w-4 h-4 mr-2" />
-                    {isLoading ? 'Ricerca in corso...' : 'Cerca Bandi'}
-                  </Button>
-                </div>
-                
-                {/* Messaggio informativo quando la ricerca è in corso */}
-                {isLoading && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center justify-center space-x-3">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-navy"></div>
-                      <div className="text-center">
-                        <p className="text-brand-navy font-medium">Ricerca in corso...</p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          L'analisi dei bandi può richiedere alcuni minuti. Attendere prego.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Results */}
-            <BandiCards bandiData={bandiData} />
-          </div>
-        </div>
+      {/* Results */}
+      <div className="animate-slide-up">
+        <BandiCards bandiData={bandiData} />
       </div>
     </div>
   );
+
 };
 
 export default Search;
