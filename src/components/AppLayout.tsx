@@ -56,7 +56,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 flex flex-col min-h-0">
             <div className="animate-fade-in">
               {children}
             </div>
