@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Calendar, Euro, Building, Users, Target, TrendingUp, Search } from 'lucide-react';
+import { ExternalLink, Calendar, Euro, Building, Users, Target, TrendingUp } from 'lucide-react';
 
 interface BandoResult {
   title: string;
@@ -26,9 +26,6 @@ interface BandiData {
   total_found: number;
   search_time: number;
   results: BandoResult[];
-  message?: string;
-  suggestions?: string[];
-  alternative_searches?: string[];
 }
 
 interface BandiCardsProps {
@@ -60,53 +57,6 @@ const BandiCards: React.FC<BandiCardsProps> = ({ bandiData, onDataReceived }) =>
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">Utilizza i filtri sopra per cercare i bandi</p>
-      </div>
-    );
-  }
-
-  // Gestisci caso nessun risultato trovato
-  if (bandiData.success === false) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-amber-800 flex items-center">
-              <Search className="w-5 h-5 mr-2" />
-              Nessun risultato trovato
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-amber-700 mb-4">
-              {bandiData.message}
-            </p>
-            
-            {bandiData.suggestions && bandiData.suggestions.length > 0 && (
-              <div className="mb-4">
-                <h4 className="font-medium text-amber-800 mb-2">Suggerimenti:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  {bandiData.suggestions.map((suggestion, index) => (
-                    <li key={index} className="text-amber-700 text-sm">
-                      {suggestion}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {bandiData.alternative_searches && bandiData.alternative_searches.length > 0 && (
-              <div>
-                <h4 className="font-medium text-amber-800 mb-2">Ricerche alternative:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {bandiData.alternative_searches.map((search, index) => (
-                    <Badge key={index} variant="outline" className="text-amber-700 border-amber-300">
-                      {search}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     );
   }

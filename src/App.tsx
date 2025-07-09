@@ -13,7 +13,7 @@ import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AppLayout from "./components/AppLayout";
+import MobileLayout from "./components/MobileLayout";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +24,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <div className="mobile-app">
+          <MobileLayout>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -35,29 +35,23 @@ const App = () => (
               } />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <AppLayout>
-                    <Dashboard />
-                  </AppLayout>
+                  <Dashboard />
                 </ProtectedRoute>
               } />
               <Route path="/search" element={
                 <ProtectedRoute>
-                  <AppLayout>
-                    <Search />
-                  </AppLayout>
+                  <Search />
                 </ProtectedRoute>
               } />
               <Route path="/saved-grants" element={
                 <ProtectedRoute>
-                  <AppLayout>
-                    <SavedGrants />
-                  </AppLayout>
+                  <SavedGrants />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </div>
+          </MobileLayout>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -22,9 +22,6 @@ export interface BandiData {
   total_found: number;
   search_time: number;
   results: BandoResult[];
-  message?: string;
-  suggestions?: string[];
-  alternative_searches?: string[];
 }
 
 export interface ParseResult {
@@ -93,25 +90,7 @@ export const parseN8NData = (rawData: any): ParseResult => {
     
     console.log('Dati parsati:', parsedData);
     
-    // Gestione caso nessun risultato trovato
-    if (parsedData.success === false) {
-      console.log('Nessun risultato trovato, restituendo messaggio di errore');
-      return {
-        success: true,
-        data: {
-          success: false,
-          total_found: parsedData.total_found || 0,
-          search_time: parsedData.search_time || 0,
-          results: [],
-          message: parsedData.message || 'Nessun bando trovato per i criteri specificati.',
-          suggestions: parsedData.suggestions || [],
-          alternative_searches: parsedData.alternative_searches || []
-        },
-        error: null
-      };
-    }
-    
-    // Validazione della struttura per risultati positivi
+    // Validazione della struttura
     if (!parsedData || !parsedData.results || !Array.isArray(parsedData.results)) {
       console.error('Struttura dati non valida:', parsedData);
       throw new Error('Struttura dati non valida: manca l\'array results');
