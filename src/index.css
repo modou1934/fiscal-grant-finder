@@ -115,6 +115,14 @@ All colors MUST be HSL.
   }
   
   /* Safe area per dispositivi con notch */
+  .safe-area-top {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+  
   .pt-safe-area-inset-top {
     padding-top: env(safe-area-inset-top);
   }
@@ -134,12 +142,53 @@ All colors MUST be HSL.
   /* Miglioramenti touch per mobile */
   .mobile-app button,
   .mobile-app .hover-lift {
-    @apply active:scale-95 transition-transform duration-150;
+    @apply active:scale-95 transition-all duration-150;
   }
   
   .mobile-app input,
   .mobile-app textarea {
     @apply text-base; /* Previene zoom su iOS */
+  }
+  
+  /* Stili per card mobile */
+  .mobile-card {
+    @apply bg-white rounded-xl shadow-sm border-0 overflow-hidden;
+  }
+  
+  .mobile-card:active {
+    @apply scale-95 transition-transform duration-150;
+  }
+  
+  /* Bottoni mobile ottimizzati */
+  .mobile-button {
+    @apply h-12 rounded-xl font-semibold transition-all duration-200;
+    min-height: 44px; /* iOS touch target minimum */
+  }
+  
+  .mobile-button:active {
+    @apply scale-95;
+  }
+  
+  /* Input mobile ottimizzati */
+  .mobile-input {
+    @apply h-12 rounded-xl border-gray-200 text-base;
+    font-size: 16px; /* Previene zoom su iOS */
+  }
+  
+  /* Header mobile */
+  .mobile-header {
+    @apply bg-white shadow-sm border-b;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  /* Gradients mobile */
+  .mobile-gradient-primary {
+    @apply bg-gradient-to-r from-brand-navy to-brand-emerald;
+  }
+  
+  .mobile-gradient-secondary {
+    @apply bg-gradient-to-r from-brand-gold to-orange-500;
   }
 
   .gradient-text {
@@ -151,6 +200,32 @@ All colors MUST be HSL.
   }
 
   .hover-lift {
-    @apply transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl;
+    @apply transition-all duration-200 hover:transform hover:-translate-y-1 hover:shadow-lg;
+  }
+  
+  /* Animazioni mobile ottimizzate */
+  .mobile-fade-in {
+    animation: mobileSlideUp 0.3s ease-out;
+  }
+  
+  @keyframes mobileSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Scrollbar nascosta per mobile */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
