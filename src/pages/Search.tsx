@@ -101,10 +101,20 @@ const Search = () => {
         
         if (parseResult.success && parseResult.data) {
           setBandiData(parseResult.data);
-          toast({
-            title: "Ricerca completata",
-            description: `Trovati ${parseResult.data.total_found} bandi`,
-          });
+          
+          // Gestisci caso nessun risultato trovato
+          if (parseResult.data.success === false) {
+            toast({
+              title: "Nessun risultato trovato",
+              description: parseResult.data.message || "Nessun bando trovato per i criteri specificati.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Ricerca completata",
+              description: `Trovati ${parseResult.data.total_found} bandi`,
+            });
+          }
         } else {
           console.error('Parsing failed:', parseResult.error);
           toast({
@@ -212,12 +222,27 @@ const Search = () => {
                   <Button 
                     onClick={handleSearch}
                     disabled={isLoading}
-                    className="bg-brand-navy hover:bg-brand-navy/90"
+                    className="bg-brand-navy hover:bg-brand-navy/90 min-w-40"
                   >
                     <SearchIcon className="w-4 h-4 mr-2" />
                     {isLoading ? 'Ricerca in corso...' : 'Cerca Bandi'}
                   </Button>
                 </div>
+                
+                {/* Messaggio informativo quando la ricerca è in corso */}
+                {isLoading && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-navy"></div>
+                      <div className="text-center">
+                        <p className="text-brand-navy font-medium">Ricerca in corso...</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          L'analisi dei bandi può richiedere alcuni minuti. Attendere prego.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

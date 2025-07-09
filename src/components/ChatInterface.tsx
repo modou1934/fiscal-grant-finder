@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, MessageSquare, Bot, Search } from 'lucide-react';
+import { Send, MessageSquare, Bot, Search, AlertCircle, Lightbulb } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import GrantResultCard from './GrantResultCard';
@@ -16,6 +16,13 @@ interface Message {
   searchInfo?: {
     total_found: number;
     search_time: number;
+    search_date?: string;
+    query_used?: string;
+  };
+  errorInfo?: {
+    message: string;
+    suggestions: string[];
+    alternative_searches?: string[];
   };
 }
 
@@ -75,105 +82,82 @@ const ChatInterface = () => {
     try {
       console.log('Tentativo di parsing risposta:', responseText);
       
-      // Prima prova a parsare direttamente come JSON
-      const directParse = JSON.parse(responseText);
+      let parsedData;
       
-      // Caso 1: Array con oggetto che contiene i dati
-      if (Array.isArray(directParse) && directParse.length > 0) {
-        const firstElement = directParse[0];
-        if (firstElement && firstElement.success !== undefined && firstElement.results) {
-          return {
-            success: true,
-            data: firstElement,
-            grantResults: firstElement.results,
-            searchInfo: {
-              total_found: firstElement.total_found || firstElement.results.length,
-              search_time: firstElement.search_time || 0
-            }
-          };
+      // Prima prova a parsare direttamente come JSON
+      try {
+        parsedData = JSON.parse(responseText);
+      } catch (e) {
+        console.log('Parsing diretto fallito, tentativo con markdown:', e);
+        
+        // Cerca JSON in blocchi markdown
+        const jsonMatches = responseText.match(/```json\s*\n?([\s\S]*?)\n?```/);
+        if (jsonMatches && jsonMatches[1]) {
+          parsedData = JSON.parse(jsonMatches[1]);
+        } else {
+          // Cerca pattern JSON nel testo (anche senza markdown)
+          const jsonPattern = /\[?\{[\s\S]*"success"[\s\S]*\}\]?/;
+          const jsonMatch = responseText.match(jsonPattern);
+          if (jsonMatch) {
+            parsedData = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error('Nessun JSON valido trovato nella risposta');
+          }
         }
       }
       
-      // Caso 2: Oggetto diretto con i dati
-      if (directParse && directParse.success !== undefined && directParse.results) {
+      // Se è un array, prende il primo elemento
+      if (Array.isArray(parsedData) && parsedData.length > 0) {
+        parsedData = parsedData[0];
+      }
+      
+      console.log('Dati parsati:', parsedData);
+      
+      // Caso 1: Successo con risultati
+      if (parsedData.success === true && parsedData.results && Array.isArray(parsedData.results) && parsedData.results.length > 0) {
         return {
           success: true,
-          data: directParse,
-          grantResults: directParse.results,
+          type: 'results',
+          grantResults: parsedData.results,
           searchInfo: {
-            total_found: directParse.total_found || directParse.results.length,
-            search_time: directParse.search_time || 0
+            total_found: parsedData.total_found || parsedData.results.length,
+            search_time: parsedData.search_time || 0,
+            search_date: parsedData.search_date,
+            query_used: parsedData.query_used
           }
         };
       }
+      
+      // Caso 2: Nessun risultato trovato
+      if (parsedData.success === false || (parsedData.results && parsedData.results.length === 0)) {
+        return {
+          success: true,
+          type: 'no_results',
+          errorInfo: {
+            message: parsedData.message || 'Nessun bando trovato per i criteri specificati.',
+            suggestions: parsedData.suggestions || [],
+            alternative_searches: parsedData.alternative_searches || []
+          },
+          searchInfo: {
+            total_found: 0,
+            search_time: parsedData.search_time || 0,
+            search_date: parsedData.search_date,
+            query_used: parsedData.query_used
+          }
+        };
+      }
+      
+      // Caso 3: Formato non riconosciuto
+      throw new Error('Formato risposta non riconosciuto');
+      
     } catch (e) {
-      console.log('Parsing diretto fallito, tentativo con markdown:', e);
+      console.log('Errore nel parsing:', e);
+      return {
+        success: false,
+        type: 'error',
+        error: e instanceof Error ? e.message : 'Errore sconosciuto'
+      };
     }
-
-    // Cerca JSON in blocchi markdown
-    const jsonMatches = responseText.match(/```json\s*\n?([\s\S]*?)\n?```/);
-    if (jsonMatches && jsonMatches[1]) {
-      try {
-        const parsedData = JSON.parse(jsonMatches[1]);
-        
-        // Gestisce sia array che oggetto diretto
-        let finalData = parsedData;
-        if (Array.isArray(parsedData) && parsedData.length > 0) {
-          finalData = parsedData[0];
-        }
-        
-        if (finalData && finalData.success !== undefined && finalData.results) {
-          return {
-            success: true,
-            data: finalData,
-            grantResults: finalData.results,
-            searchInfo: {
-              total_found: finalData.total_found || finalData.results.length,
-              search_time: finalData.search_time || 0
-            }
-          };
-        }
-      } catch (e) {
-        console.log('Failed to parse markdown JSON:', e);
-      }
-    }
-
-    // Cerca pattern JSON nel testo (anche senza markdown)
-    const jsonPattern = /\[?\{[\s\S]*"success"[\s\S]*"results"[\s\S]*\}\]?/;
-    const jsonMatch = responseText.match(jsonPattern);
-    if (jsonMatch) {
-      try {
-        const parsedData = JSON.parse(jsonMatch[0]);
-        
-        // Gestisce sia array che oggetto diretto
-        let finalData = parsedData;
-        if (Array.isArray(parsedData) && parsedData.length > 0) {
-          finalData = parsedData[0];
-        }
-        
-        if (finalData && finalData.success !== undefined && finalData.results) {
-          return {
-            success: true,
-            data: finalData,
-            grantResults: finalData.results,
-            searchInfo: {
-              total_found: finalData.total_found || finalData.results.length,
-              search_time: finalData.search_time || 0
-            }
-          };
-        }
-      } catch (e) {
-        console.log('Failed to parse extracted JSON:', e);
-      }
-    }
-
-    console.log('Nessun formato JSON valido trovato nella risposta');
-    return {
-      success: false,
-      data: null,
-      grantResults: [],
-      searchInfo: null
-    };
   };
 
   const handleSendMessage = async () => {
@@ -210,23 +194,32 @@ const ChatInterface = () => {
       let aiResponse = '';
       let grantResults: GrantResult[] = [];
       let searchInfo = undefined;
+      let errorInfo = undefined;
       
       if (response.ok) {
         const responseText = await response.text();
         console.log('Raw webhook response:', responseText);
         
-        // Usa la nuova funzione di parsing
         const parseResult = parseGrantsFromResponse(responseText);
         
-        if (parseResult.success && parseResult.grantResults.length > 0) {
-          grantResults = parseResult.grantResults;
-          searchInfo = parseResult.searchInfo;
-          aiResponse = `Ho trovato ${parseResult.searchInfo?.total_found || parseResult.grantResults.length} bandi per te! Ecco i risultati più rilevanti:`;
-          console.log('Successfully extracted grant results:', grantResults.length);
+        if (parseResult.success) {
+          if (parseResult.type === 'results') {
+            // Caso con risultati
+            grantResults = parseResult.grantResults || [];
+            searchInfo = parseResult.searchInfo;
+            aiResponse = `Ho trovato ${searchInfo?.total_found || grantResults.length} bandi per te! Ecco i risultati più rilevanti:`;
+            console.log('Successfully extracted grant results:', grantResults.length);
+          } else if (parseResult.type === 'no_results') {
+            // Caso senza risultati
+            errorInfo = parseResult.errorInfo;
+            searchInfo = parseResult.searchInfo;
+            aiResponse = parseResult.errorInfo?.message || 'Nessun bando trovato per i criteri specificati.';
+            console.log('No results found, showing suggestions');
+          }
         } else {
-          // Se non ci sono bandi validi, mostra la risposta completa
+          // Errore nel parsing, mostra la risposta completa
           aiResponse = responseText;
-          console.log('No valid grant data found, showing full response');
+          console.log('Parsing failed, showing full response');
         }
         
       } else {
@@ -249,7 +242,8 @@ const ChatInterface = () => {
         isUser: false,
         timestamp: new Date(),
         grantResults: grantResults.length > 0 ? grantResults : undefined,
-        searchInfo
+        searchInfo,
+        errorInfo
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -281,6 +275,10 @@ const ChatInterface = () => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputValue(suggestion);
   };
 
   return (
@@ -323,6 +321,9 @@ const ChatInterface = () => {
                                 <span>{message.searchInfo.total_found} risultati</span>
                               </div>
                               <span>Tempo: {message.searchInfo.search_time.toFixed(1)}s</span>
+                              {message.searchInfo.search_date && (
+                                <span>Data: {message.searchInfo.search_date}</span>
+                              )}
                             </div>
                           )}
                         </div>
@@ -347,6 +348,51 @@ const ChatInterface = () => {
                           isSaved={savedGrants.includes(grant.title + grant.entity)}
                         />
                       ))}
+                    </div>
+                  )}
+                  
+                  {/* Visualizza suggerimenti quando non ci sono risultati */}
+                  {message.errorInfo && message.errorInfo.suggestions.length > 0 && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                      <div className="flex items-start space-x-3">
+                        <Lightbulb className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-amber-800 mb-2">
+                            Suggerimenti per migliorare la ricerca:
+                          </h4>
+                          <ul className="space-y-2">
+                            {message.errorInfo.suggestions.map((suggestion, idx) => (
+                              <li key={idx} className="text-sm text-amber-700">
+                                <button
+                                  onClick={() => handleSuggestionClick(suggestion)}
+                                  className="text-left hover:text-amber-900 hover:underline cursor-pointer"
+                                >
+                                  • {suggestion}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                          
+                          {message.errorInfo.alternative_searches && message.errorInfo.alternative_searches.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-amber-200">
+                              <h5 className="text-xs font-medium text-amber-800 mb-2">
+                                Ricerche alternative:
+                              </h5>
+                              <div className="flex flex-wrap gap-2">
+                                {message.errorInfo.alternative_searches.map((altSearch, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleSuggestionClick(altSearch)}
+                                    className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded hover:bg-amber-200 transition-colors"
+                                  >
+                                    {altSearch}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
