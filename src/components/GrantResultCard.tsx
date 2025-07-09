@@ -3,7 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Euro, Bookmark, ExternalLink, Building2, Users, TrendingUp, Clock, Zap } from 'lucide-react';
+import { Calendar, MapPin, Euro, Bookmark, BookmarkCheck, ExternalLink, Building2, Users, TrendingUp, Clock, Zap } from 'lucide-react';
+import { useSavedGrants } from '@/hooks/use-saved-grants';
+import { toast } from 'sonner';
 
 interface GrantResult {
   title: string;
@@ -25,11 +27,12 @@ interface GrantResult {
 
 interface GrantResultCardProps {
   grant: GrantResult;
-  onSave?: (grant: GrantResult) => void;
-  isSaved?: boolean;
 }
 
-const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant, onSave, isSaved = false }) => {
+const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant }) => {
+  const { isGrantSaved, toggleSaveGrant } = useSavedGrants();
+  const isSaved = isGrantSaved(grant);
+
   const getRelevanceColor = (score: number) => {
     if (score >= 9) return 'bg-green-500';
     if (score >= 7) return 'bg-yellow-500';
@@ -55,8 +58,20 @@ const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant, onSave, isSave
     }
   };
 
+  const handleSaveToggle = () => {
+    const wasToggled = toggleSaveGrant(grant);
+    
+    if (isSaved) {
+      toast.success('Bando rimosso dai salvati');
+    } else if (wasToggled) {
+      toast.success('Bando salvato con successo!');
+    } else {
+      toast.error('Errore nel salvare il bando');
+    }
+  };
+
   return (
-    <Card className="hover-lift border-0 shadow-lg bg-gradient-to-br from-yellow-100 via-yellow-200 to-yellow-300">
+    <Card className="hover-lift border-0 shadow-lg bg-white rounded-xl">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg font-semibold text-brand-navy line-clamp-2 flex-1">
@@ -70,10 +85,18 @@ const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant, onSave, isSave
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onSave?.(grant)}
-              className={`p-1 h-8 w-8 ${isSaved ? 'text-brand-gold' : 'text-gray-600'}`}
+              onClick={handleSaveToggle}
+              className={`p-2 h-10 w-10 rounded-full transition-all ${
+                isSaved 
+                  ? 'text-brand-gold bg-brand-gold/10 hover:bg-brand-gold/20' 
+                  : 'text-gray-400 hover:text-brand-gold hover:bg-brand-gold/10'
+              }`}
             >
-              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+              {isSaved ? (
+                <BookmarkCheck className="w-5 h-5 fill-current" />
+              ) : (
+                <Bookmark className="w-5 h-5" />
+              )}
             </Button>
           </div>
         </div>
@@ -84,7 +107,11 @@ const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant, onSave, isSave
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-2">
+        <p className="text-sm text-gray-600 line-clamp-3 mb-4">
+          {grant.description}
+        </p>
+        
+        <div className="flex flex-wrap gap-2 mb-4">
           <Badge variant="default" className="text-xs bg-brand-navy text-white">
             {grant.sectors[0]}
           </Badge>
@@ -116,7 +143,7 @@ const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant, onSave, isSave
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-gray-600 bg-white/50 rounded p-2">
+        <div className="flex items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-lg p-3">
           <div className="flex items-center space-x-3">
             <div className="flex items-center">
               <TrendingUp className="w-3 h-3 mr-1" />
@@ -133,11 +160,11 @@ const GrantResultCard: React.FC<GrantResultCardProps> = ({ grant, onSave, isSave
         
         <div className="flex items-center justify-between pt-2">
           <span className="text-xs text-gray-600">
-            Budget: {grant.total_budget}
+            <strong>Budget:</strong> {grant.total_budget}
           </span>
           <Button 
             size="sm" 
-            className="bg-brand-navy hover:bg-brand-navy/90"
+            className="bg-brand-navy hover:bg-brand-navy/90 rounded-lg"
             onClick={() => window.open(grant.url, '_blank')}
           >
             <ExternalLink className="w-4 h-4 mr-2" />

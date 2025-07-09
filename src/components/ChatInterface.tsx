@@ -6,6 +6,7 @@ import { Send, MessageSquare, Bot, Search, AlertCircle, Lightbulb } from 'lucide
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import GrantResultCard from './GrantResultCard';
+import { useSavedGrants } from '@/hooks/use-saved-grants';
 
 interface Message {
   id: string;
@@ -55,27 +56,7 @@ const ChatInterface = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [savedGrants, setSavedGrants] = useState<string[]>([]);
   const { toast } = useToast();
-
-  const handleSaveGrant = (grant: GrantResult) => {
-    const grantId = grant.title + grant.entity; // Create a unique ID
-    setSavedGrants(prev => {
-      const isAlreadySaved = prev.includes(grantId);
-      const newSavedGrants = isAlreadySaved 
-        ? prev.filter(id => id !== grantId)
-        : [...prev, grantId];
-      
-      toast({
-        title: isAlreadySaved ? "Bando rimosso" : "Bando salvato",
-        description: isAlreadySaved 
-          ? "Il bando è stato rimosso dai salvati" 
-          : "Il bando è stato aggiunto ai salvati",
-      });
-      
-      return newSavedGrants;
-    });
-  };
 
   // Funzione per estrarre e parsare il JSON dalla risposta
   const parseGrantsFromResponse = (responseText: string) => {
@@ -344,8 +325,6 @@ const ChatInterface = () => {
                         <GrantResultCard
                           key={`${grant.title}-${index}`}
                           grant={grant}
-                          onSave={handleSaveGrant}
-                          isSaved={savedGrants.includes(grant.title + grant.entity)}
                         />
                       ))}
                     </div>

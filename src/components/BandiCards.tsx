@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Calendar, Euro, Building, Users, Target, TrendingUp, Search } from 'lucide-react';
+import { ExternalLink, Calendar, Euro, Building, Users, Target, TrendingUp, Search, Bookmark, BookmarkCheck } from 'lucide-react';
+import { useSavedGrants } from '@/hooks/use-saved-grants';
+import { toast } from 'sonner';
 
 interface BandoResult {
   title: string;
@@ -37,6 +39,8 @@ interface BandiCardsProps {
 }
 
 const BandiCards: React.FC<BandiCardsProps> = ({ bandiData, onDataReceived }) => {
+  const { isGrantSaved, toggleSaveGrant } = useSavedGrants();
+
   const formatCurrency = (amount: string) => {
     return amount.replace(/€/g, '').replace(/\./g, ',') + ' €';
   };
@@ -54,6 +58,19 @@ const BandiCards: React.FC<BandiCardsProps> = ({ bandiData, onDataReceived }) =>
     if (score >= 8) return 'bg-green-100 text-green-800';
     if (score >= 6) return 'bg-yellow-100 text-yellow-800';
     return 'bg-red-100 text-red-800';
+  };
+
+  const handleSaveToggle = (bando: BandoResult) => {
+    const wasToggled = toggleSaveGrant(bando);
+    const isSaved = isGrantSaved(bando);
+    
+    if (isSaved) {
+      toast.success('Bando rimosso dai salvati');
+    } else if (wasToggled) {
+      toast.success('Bando salvato con successo!');
+    } else {
+      toast.error('Errore nel salvare il bando');
+    }
   };
 
   if (!bandiData) {
@@ -122,15 +139,33 @@ const BandiCards: React.FC<BandiCardsProps> = ({ bandiData, onDataReceived }) =>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {bandiData.results.map((bando, index) => (
-          <Card key={index} className="h-full flex flex-col hover:shadow-lg transition-shadow duration-200">
+          <Card key={index} className="h-full flex flex-col hover:shadow-lg transition-shadow duration-200 rounded-xl border-0 shadow-md">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-2">
                 <CardTitle className="text-lg leading-tight line-clamp-3">
                   {bando.title}
                 </CardTitle>
-                <Badge className={getRelevanceColor(bando.relevance_score)}>
-                  {bando.relevance_score}/10
-                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Badge className={getRelevanceColor(bando.relevance_score)}>
+                    {bando.relevance_score}/10
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSaveToggle(bando)}
+                    className={`p-2 h-8 w-8 rounded-full transition-all ${
+                      isGrantSaved(bando)
+                        ? 'text-brand-gold bg-brand-gold/10 hover:bg-brand-gold/20' 
+                        : 'text-gray-400 hover:text-brand-gold hover:bg-brand-gold/10'
+                    }`}
+                  >
+                    {isGrantSaved(bando) ? (
+                      <BookmarkCheck className="w-4 h-4 fill-current" />
+                    ) : (
+                      <Bookmark className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
               <p className="text-sm text-gray-600 mt-1">{bando.entity}</p>
             </CardHeader>
@@ -211,7 +246,7 @@ const BandiCards: React.FC<BandiCardsProps> = ({ bandiData, onDataReceived }) =>
               <div className="mt-auto pt-4">
                 <Button 
                   asChild 
-                  className="w-full bg-brand-navy hover:bg-brand-navy/90"
+                  className="w-full bg-brand-navy hover:bg-brand-navy/90 rounded-lg"
                 >
                   <a href={bando.url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="w-4 h-4 mr-2" />

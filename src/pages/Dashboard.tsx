@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Search, MessageSquare, LogOut, ArrowRight, Bookmark, TrendingUp, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useSavedGrants } from '@/hooks/use-saved-grants';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { getSavedGrantsCount } = useSavedGrants();
 
   const handleSignOut = async () => {
     try {
@@ -78,7 +80,7 @@ const Dashboard = () => {
               <div className="w-10 h-10 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-2">
                 <Bookmark className="w-5 h-5 text-brand-gold" />
               </div>
-              <p className="text-2xl font-bold text-brand-gold">0</p>
+              <p className="text-2xl font-bold text-brand-gold">{getSavedGrantsCount()}</p>
               <p className="text-xs text-gray-600">Salvati</p>
             </CardContent>
           </Card>
