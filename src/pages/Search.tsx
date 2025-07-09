@@ -101,10 +101,20 @@ const Search = () => {
         
         if (parseResult.success && parseResult.data) {
           setBandiData(parseResult.data);
-          toast({
-            title: "Ricerca completata",
-            description: `Trovati ${parseResult.data.total_found} bandi`,
-          });
+          
+          // Gestisci caso nessun risultato trovato
+          if (parseResult.data.success === false) {
+            toast({
+              title: "Nessun risultato trovato",
+              description: parseResult.data.message || "Nessun bando trovato per i criteri specificati.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Ricerca completata",
+              description: `Trovati ${parseResult.data.total_found} bandi`,
+            });
+          }
         } else {
           console.error('Parsing failed:', parseResult.error);
           toast({
