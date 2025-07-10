@@ -59,24 +59,6 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Trust Indicators - Mobile */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-              <Users className="w-6 h-6 text-brand-gold mx-auto mb-1" />
-              <div className="text-white font-semibold text-sm">5000+</div>
-              <div className="text-blue-200 text-xs">Utenti</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-              <TrendingUp className="w-6 h-6 text-brand-emerald mx-auto mb-1" />
-              <div className="text-white font-semibold text-sm">€50M+</div>
-              <div className="text-blue-200 text-xs">Ottenuti</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-              <Zap className="w-6 h-6 text-brand-gold mx-auto mb-1" />
-              <div className="text-white font-semibold text-sm">4.9/5</div>
-              <div className="text-blue-200 text-xs">Rating</div>
-            </div>
-          </div>
         </div>
       </section>
 

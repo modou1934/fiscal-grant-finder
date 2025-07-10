@@ -166,6 +166,7 @@ const ChatInterface = () => {
       });
       
       const response = await fetch(`https://fiscalot.duckdns.org/webhook-test/2f381203-47e1-4fd6-8221-438bad7fee08?${params}`, {
+      const response = await fetch(`https://fiscalot.duckdns.org/webhook/2f381203-47e1-4fd6-8221-438bad7fee08?${params}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
