@@ -268,7 +268,7 @@ const ChatInterface = () => {
         <CardHeader className="bg-gradient-to-r from-brand-navy to-brand-emerald text-white">
           <CardTitle className="flex items-center">
             <Bot className="w-6 h-6 mr-2" />
-            Assistente IA per Bandi
+            Fiscalot AI Assistant
           </CardTitle>
         </CardHeader>
         

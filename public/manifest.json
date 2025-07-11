@@ -1,6 +1,6 @@
 {
-  "name": "GrantFinder",
-  "short_name": "GrantFinder",
+  "name": "Fiscalot AI",
+  "short_name": "Fiscalot AI",
   "description": "La piattaforma AI per la ricerca intelligente di bandi e finanziamenti pubblici",
   "start_url": "/",
   "display": "standalone",

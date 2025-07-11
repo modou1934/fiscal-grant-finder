@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.grantfinder.app',
-  appName: 'GrantFinder',
+  appName: 'Fiscalot AI',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
