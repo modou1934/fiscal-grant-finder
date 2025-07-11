@@ -18,9 +18,11 @@ const Index = () => {
       <header className="safe-area-top px-4 py-3">
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <div className="w-6 h-6 text-white font-bold text-sm flex items-center justify-center">F</div>
-            </div>
+            <img 
+              src="https://i.ibb.co/v4rvFdW/logo.png" 
+              alt="Fiscalot AI" 
+              className="w-10 h-10 rounded-xl"
+            />
             <span className="text-xl font-bold text-white">Fiscalot AI</span>
           </div>
           <Button 
@@ -209,9 +211,11 @@ const Index = () => {
       <footer className="px-4 py-6 bg-black/20 backdrop-blur-sm safe-area-bottom">
         <div className="max-w-sm mx-auto">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <div className="w-5 h-5 text-white font-bold text-xs flex items-center justify-center">F</div>
-            </div>
+            <img 
+              src="https://i.ibb.co/v4rvFdW/logo.png" 
+              alt="Fiscalot AI" 
+              className="w-8 h-8 rounded-lg"
+            />
             <span className="text-lg font-bold text-white">Fiscalot AI</span>
           </div>
           <p className="text-center text-blue-200 text-sm mb-4">
