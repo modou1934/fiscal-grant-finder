@@ -123,7 +123,7 @@ const Search = () => {
               
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-r from-brand-navy to-brand-emerald rounded-lg flex items-center justify-center">
-                  <SearchIcon className="w-5 h-5 text-white" />
+                  <div className="w-5 h-5 text-white font-bold text-xs flex items-center justify-center">F</div>
                 </div>
                 <div>
                   <span className="text-lg font-bold text-brand-navy">Ricerca</span>

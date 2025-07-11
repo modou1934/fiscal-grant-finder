@@ -59,9 +59,9 @@ const Auth = () => {
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Search className="w-6 h-6 text-white" />
+              <div className="w-6 h-6 text-white font-bold text-sm flex items-center justify-center">F</div>
             </div>
-            <span className="text-xl font-bold text-white">GrantFinder</span>
+            <span className="text-xl font-bold text-white">Fiscalot AI</span>
           </div>
           <Button 
             variant="ghost" 

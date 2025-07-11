@@ -27,10 +27,10 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-brand-navy to-brand-emerald rounded-xl flex items-center justify-center">
-                <Search className="w-6 h-6 text-white" />
+                <div className="w-6 h-6 text-white font-bold text-sm flex items-center justify-center">F</div>
               </div>
               <div>
-                <span className="text-lg font-bold text-brand-navy">GrantFinder</span>
+                <span className="text-lg font-bold text-brand-navy">Fiscalot AI</span>
                 <p className="text-xs text-gray-500">Dashboard</p>
               </div>
             </div>
