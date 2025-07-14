@@ -312,11 +312,9 @@ const Onboarding = () => {
       {/* Header */}
       <header className="w-full px-4 sm:px-6 py-4">
         <div className="flex items-center space-x-2">
-          <img 
-            src="https://postimg.cc/JDfhKPKR" 
-            alt="Fiscalot AI" 
-            className="w-8 h-8 object-contain rounded-lg"
-          />
+          <div className="w-8 h-8 bg-gradient-to-r from-brand-navy to-brand-emerald rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">F</span>
+          </div>
           <span className="text-lg sm:text-xl font-bold text-brand-primary">Fiscalot AI</span>
         </div>
       </header>

@@ -26,11 +26,9 @@ const Dashboard = () => {
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img 
-                src="https://postimg.cc/JDfhKPKR" 
-                alt="Fiscalot AI" 
-                className="w-10 h-10 object-contain rounded-lg"
-              />
+              <div className="w-10 h-10 bg-gradient-to-r from-brand-navy to-brand-emerald rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">F</span>
+              </div>
               <div>
                 <span className="text-base sm:text-lg font-bold text-brand-primary">Fiscalot AI</span>
                 <p className="text-xs text-gray-500">Dashboard</p>

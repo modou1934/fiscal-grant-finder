@@ -122,11 +122,9 @@ const Search = () => {
               </Button>
               
               <div className="flex items-center space-x-2">
-                <img 
-                  src="https://postimg.cc/JDfhKPKR" 
-                  alt="Fiscalot AI" 
-                  className="w-8 h-8 object-contain rounded-lg"
-                />
+                <div className="w-8 h-8 bg-gradient-to-r from-brand-navy to-brand-emerald rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">F</span>
+                </div>
                 <div>
                   <span className="text-base sm:text-lg font-bold text-brand-primary">Ricerca</span>
                   <p className="text-xs text-gray-500">Trova i tuoi bandi</p>

@@ -58,11 +58,9 @@ const Auth = () => {
       <header className="safe-area-top px-4 py-3 w-full">
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img 
-              src="https://postimg.cc/JDfhKPKR" 
-              alt="Fiscalot AI" 
-              className="w-10 h-10 object-contain rounded-lg"
-            />
+            <div className="w-10 h-10 bg-gradient-to-r from-brand-navy to-brand-emerald rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">F</span>
+            </div>
             <span className="text-lg sm:text-xl font-bold text-white">Fiscalot AI</span>
           </div>
           <Button 
@@ -81,7 +79,7 @@ const Auth = () => {
           <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm rounded-2xl">
             <CardHeader className="text-center space-y-4 pb-6 px-4 sm:px-6">
               <img 
-                src="https://postimg.cc/JDfhKPKR" 
+                src="https://i.postimg.cc/JDfhKPKR/logo.png" 
                 alt="Fiscalot AI" 
                 className="w-16 h-16 object-contain rounded-2xl mx-auto"
               />
