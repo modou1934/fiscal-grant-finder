@@ -109,26 +109,26 @@ const Search = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Header */}
-      <header className="bg-white shadow-sm border-b safe-area-top">
+      <header className="bg-white shadow-sm border-b safe-area-top w-full">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Button 
                 variant="ghost"
                 onClick={() => navigate('/dashboard')}
-                className="text-brand-navy hover:bg-brand-navy/10 p-2 rounded-full"
+                className="text-brand-primary hover:bg-brand-primary/10 p-2 rounded-full"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               
               <div className="flex items-center space-x-2">
                 <img 
-                  src="https://i.ibb.co/v4rvFdW/logo.png" 
+                  src="https://postimg.cc/JDfhKPKR" 
                   alt="Fiscalot AI" 
-                  className="w-8 h-8 rounded-lg"
+                  className="w-8 h-8 object-contain rounded-lg"
                 />
                 <div>
-                  <span className="text-lg font-bold text-brand-navy">Ricerca</span>
+                  <span className="text-base sm:text-lg font-bold text-brand-primary">Ricerca</span>
                   <p className="text-xs text-gray-500">Trova i tuoi bandi</p>
                 </div>
               </div>
@@ -138,7 +138,7 @@ const Search = () => {
               variant="ghost" 
               size="sm"
               onClick={handleSignOut}
-              className="text-gray-600 hover:text-brand-navy p-2"
+              className="text-gray-600 hover:text-brand-primary p-2"
             >
               <LogOut className="w-5 h-5" />
             </Button>
@@ -147,7 +147,7 @@ const Search = () => {
       </header>
 
       {/* Search Bar - Mobile */}
-      <div className="px-4 py-4 bg-white border-b">
+      <div className="px-4 py-4 bg-white border-b w-full">
         <div className="space-y-3">
           <div className="flex space-x-2">
             <div className="flex-1 relative">
@@ -155,7 +155,7 @@ const Search = () => {
                 placeholder="Cerca bandi..." 
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
-                className="h-12 rounded-xl border-gray-200 focus:border-brand-navy pr-12"
+                className="h-12 rounded-xl bg-white border-gray-300 focus:border-brand-primary focus:ring-brand-primary pr-12 text-base"
               />
               {keywords && (
                 <Button
@@ -171,7 +171,7 @@ const Search = () => {
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="h-12 px-4 rounded-xl border-gray-200"
+              className="h-12 px-4 rounded-xl border-gray-300"
             >
               <SlidersHorizontal className="w-5 h-5" />
             </Button>
@@ -184,13 +184,13 @@ const Search = () => {
                 placeholder="Settore (es. Tecnologia)" 
                 value={sector}
                 onChange={(e) => setSector(e.target.value)}
-                className="h-12 rounded-xl border-gray-200 focus:border-brand-navy"
+                className="h-12 rounded-xl bg-white border-gray-300 focus:border-brand-primary focus:ring-brand-primary text-base"
               />
               <Input 
                 placeholder="Regione (es. Lombardia)" 
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="h-12 rounded-xl border-gray-200 focus:border-brand-navy"
+                className="h-12 rounded-xl bg-white border-gray-300 focus:border-brand-primary focus:ring-brand-primary text-base"
               />
               <div className="flex space-x-2">
                 <Button
@@ -202,7 +202,7 @@ const Search = () => {
                 </Button>
                 <Button
                   onClick={() => setShowFilters(false)}
-                  className="flex-1 h-10 rounded-xl bg-brand-navy text-white"
+                  className="flex-1 h-10 rounded-xl bg-brand-primary text-white"
                 >
                   Applica
                 </Button>
@@ -213,7 +213,7 @@ const Search = () => {
           <Button 
             onClick={handleSearch}
             disabled={isLoading}
-            className="w-full bg-brand-navy hover:bg-brand-navy/90 h-12 rounded-xl font-semibold"
+            className="w-full bg-brand-primary hover:bg-brand-primary/90 h-12 rounded-xl font-semibold text-sm sm:text-base"
           >
             <SearchIcon className="w-5 h-5 mr-2" />
             {isLoading ? 'Ricerca in corso...' : 'Cerca Bandi'}
@@ -223,13 +223,13 @@ const Search = () => {
 
       {/* Loading State - Mobile */}
       {isLoading && (
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 w-full">
           <Card className="border-0 bg-blue-50 rounded-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-center space-x-3">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-navy"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
                 <div className="text-center">
-                  <p className="text-brand-navy font-medium">Ricerca in corso...</p>
+                  <p className="text-brand-primary font-medium">Ricerca in corso...</p>
                   <p className="text-sm text-gray-600 mt-1">
                     Analisi dei bandi in corso
                   </p>
@@ -241,7 +241,7 @@ const Search = () => {
       )}
 
       {/* Results - Mobile */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 w-full">
         <BandiCards bandiData={bandiData} />
       </div>
 

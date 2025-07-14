@@ -310,27 +310,27 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-light via-white to-blue-50">
       {/* Header */}
-      <header className="container mx-auto px-6 py-4">
+      <header className="w-full px-4 sm:px-6 py-4">
         <div className="flex items-center space-x-2">
           <img 
-            src="https://i.ibb.co/v4rvFdW/logo.png" 
+            src="https://postimg.cc/JDfhKPKR" 
             alt="Fiscalot AI" 
-            className="w-8 h-8 rounded-lg"
+            className="w-8 h-8 object-contain rounded-lg"
           />
-          <span className="text-xl font-bold text-brand-navy">Fiscalot AI</span>
+          <span className="text-lg sm:text-xl font-bold text-brand-primary">Fiscalot AI</span>
         </div>
       </header>
 
       {/* Progress Bar */}
-      <div className="container mx-auto px-6 mb-8">
+      <div className="w-full px-4 sm:px-6 mb-8">
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-brand-navy font-medium">Passo {currentStep} di 3</span>
+            <span className="text-sm text-brand-primary font-medium">Passo {currentStep} di 3</span>
             <span className="text-sm text-gray-500">{Math.round((currentStep / 3) * 100)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-brand-navy to-brand-emerald h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-brand-primary to-brand-secondary h-2 rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / 3) * 100}%` }}
             ></div>
           </div>
@@ -338,29 +338,29 @@ const Onboarding = () => {
       </div>
 
       {/* Form */}
-      <div className="flex items-center justify-center px-6 pb-12">
-        <div className="w-full max-w-lg">
+      <div className="flex items-center justify-center px-4 sm:px-6 pb-12 min-h-[60vh]">
+        <div className="w-full max-w-sm sm:max-w-lg">
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8">
+          <div className="flex justify-between mt-6 sm:mt-8 space-x-4">
             {currentStep > 1 && (
               <Button 
                 variant="outline" 
                 onClick={handleBack}
-                className="border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white"
+                className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white flex-1 sm:flex-none"
               >
                 Indietro
               </Button>
             )}
             
-            <div className="ml-auto">
+            <div className={`${currentStep === 1 ? 'w-full' : 'flex-1 sm:flex-none ml-auto'}`}>
               {currentStep < 3 ? (
                 <Button 
                   onClick={handleNext}
-                  className="bg-brand-navy hover:bg-brand-navy/90 text-white px-8"
+                  className="bg-brand-primary hover:bg-brand-primary/90 text-white w-full sm:w-auto px-6 sm:px-8"
                 >
                   Avanti
                 </Button>
@@ -368,7 +368,7 @@ const Onboarding = () => {
                 <Button 
                   onClick={handleComplete}
                   disabled={loading}
-                  className="bg-brand-emerald hover:bg-brand-emerald/90 text-white px-8"
+                  className="bg-brand-secondary hover:bg-brand-secondary/90 text-white w-full sm:w-auto px-6 sm:px-8"
                 >
                   {loading ? (
                     <div className="flex items-center">

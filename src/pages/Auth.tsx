@@ -53,22 +53,22 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-navy to-brand-emerald">
+    <div className="min-h-screen bg-gradient-to-br from-brand-primary to-brand-secondary">
       {/* Mobile Header */}
-      <header className="safe-area-top px-4 py-3">
+      <header className="safe-area-top px-4 py-3 w-full">
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <img 
-              src="https://i.ibb.co/v4rvFdW/logo.png" 
+              src="https://postimg.cc/JDfhKPKR" 
               alt="Fiscalot AI" 
-              className="w-10 h-10 rounded-xl"
+              className="w-10 h-10 object-contain rounded-lg"
             />
-            <span className="text-xl font-bold text-white">Fiscalot AI</span>
+            <span className="text-lg sm:text-xl font-bold text-white">Fiscalot AI</span>
           </div>
           <Button 
             variant="ghost" 
             onClick={() => navigate('/')}
-            className="text-white hover:bg-white/10 p-2 rounded-full"
+            className="text-white hover:bg-white/10 p-2 rounded-full text-sm sm:text-base"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -76,27 +76,27 @@ const Auth = () => {
       </header>
 
       {/* Auth Form - Mobile */}
-      <div className="flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-sm">
+      <div className="flex items-center justify-center px-4 py-6 sm:py-8 min-h-[calc(100vh-80px)]">
+        <div className="w-full max-w-sm sm:max-w-md">
           <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm rounded-2xl">
-            <CardHeader className="text-center space-y-4 pb-6">
+            <CardHeader className="text-center space-y-4 pb-6 px-4 sm:px-6">
               <img 
-                src="https://i.ibb.co/v4rvFdW/logo.png" 
+                src="https://postimg.cc/JDfhKPKR" 
                 alt="Fiscalot AI" 
-                className="w-16 h-16 rounded-2xl mx-auto"
+                className="w-16 h-16 object-contain rounded-2xl mx-auto"
               />
-              <CardTitle className="text-2xl font-bold text-brand-navy">
+              <CardTitle className="text-xl sm:text-2xl font-bold text-brand-primary">
                 Accesso Riservato
               </CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-sm sm:text-base text-gray-600">
                 Inserisci le credenziali per accedere
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-6 px-6 pb-8">
+            <CardContent className="space-y-6 px-4 sm:px-6 pb-8">
               <form onSubmit={handleEmailSignIn} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
+                  <Label htmlFor="email" className="text-sm sm:text-base text-gray-700 font-medium">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -104,12 +104,12 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full h-12 rounded-xl border-gray-200 focus:border-brand-navy"
+                    className="w-full h-12 rounded-xl bg-white border-gray-300 focus:border-brand-primary focus:ring-brand-primary text-base"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
+                  <Label htmlFor="password" className="text-sm sm:text-base text-gray-700 font-medium">Password</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -118,7 +118,7 @@ const Auth = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="w-full h-12 rounded-xl border-gray-200 focus:border-brand-navy pr-12"
+                      className="w-full h-12 rounded-xl bg-white border-gray-300 focus:border-brand-primary focus:ring-brand-primary pr-12 text-base"
                     />
                     <Button
                       type="button"
@@ -139,7 +139,7 @@ const Auth = () => {
                 <Button 
                   type="submit"
                   disabled={isSigningIn}
-                  className="w-full bg-brand-navy text-white hover:bg-brand-navy/90 h-12 rounded-xl font-semibold"
+                  className="w-full bg-brand-primary text-white hover:bg-brand-primary/90 h-12 rounded-xl font-semibold text-sm sm:text-base"
                 >
                   {isSigningIn ? (
                     <div className="flex items-center justify-center">
@@ -155,26 +155,26 @@ const Auth = () => {
               <div className="text-center">
                 <p className="text-xs text-gray-500">
                   Non hai le credenziali?{' '}
-                  <span className="text-brand-navy font-medium">Contatta l'amministratore</span>
+                  <span className="text-brand-primary font-medium">Contatta l'amministratore</span>
                 </p>
               </div>
 
               {/* Benefits - Mobile */}
               <div className="pt-6 border-t border-gray-100">
-                <h3 className="text-sm font-semibold text-brand-navy mb-3 text-center">
+                <h3 className="text-sm font-semibold text-brand-primary mb-3 text-center">
                   Cosa otterrai:
                 </h3>
                 <div className="space-y-2">
                   <div className="flex items-center text-sm text-gray-600">
-                    <div className="w-2 h-2 bg-brand-emerald rounded-full mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-brand-secondary rounded-full mr-3 flex-shrink-0"></div>
                     Ricerca intelligente tra migliaia di bandi
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
-                    <div className="w-2 h-2 bg-brand-gold rounded-full mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-brand-accent rounded-full mr-3 flex-shrink-0"></div>
                     Notifiche personalizzate sulle scadenze
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
-                    <div className="w-2 h-2 bg-brand-navy rounded-full mr-3 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-brand-primary rounded-full mr-3 flex-shrink-0"></div>
                     Dashboard per monitorare le candidature
                   </div>
                 </div>

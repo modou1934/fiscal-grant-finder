@@ -65,11 +65,12 @@ export default {
 				},
 				// Colori personalizzati per l'app
 				brand: {
-					navy: '#1e3a8a',
-					gold: '#f59e0b',
-					emerald: '#10b981',
+					primary: '#3b82f6', // Blu principale dal logo
+					secondary: '#10b981', // Verde dal logo
+					accent: '#22c55e', // Verde chiaro
+					dark: '#1e293b', // Blu scuro
 					light: '#f8fafc',
-					dark: '#1f2937'
+					gray: '#64748b'
 				}
 			},
 			borderRadius: {
